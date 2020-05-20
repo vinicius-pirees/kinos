@@ -1,0 +1,45 @@
+version: '2.1'
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+  kafka-1:
+    image: wurstmeister/kafka
+    ports:
+      - "9095:9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka1.test.local
+      KAFKA_ADVERTISED_PORT: 9095
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LOG_DIRS: /kafka/logs
+      KAFKA_BROKER_ID: 500
+      KAFKA_offsets_topic_replication_factor: 3
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${KAFKA_DATA}/500:/kafka
+
+  kafka-2:
+    image: wurstmeister/kafka
+    ports:
+      - "9096:9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka2.test.local
+      KAFKA_ADVERTISED_PORT: 9096
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LOG_DIRS: /kafka/logs
+      KAFKA_BROKER_ID: 501
+      KAFKA_offsets_topic_replication_factor: 3
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${KAFKA_DATA}/501:/kafka
+
+  phaino:
+    image: phaino:tensorflow1-gpu
+    restart: always
+    depends_on:
+        - zookeeper
+        - kafka-1
+        - kafka-2
+
+# Kafka docker http://www.smartjava.org/content/setting-up-kafka-cluster-docker-copy/
