@@ -20,9 +20,10 @@ def blockshaped(arr, nrows, ncols):
 def divide_in_tiles(frame, tile_size=10):
     return blockshaped(frame, tile_size, tile_size)
 
-def convert_and_resize(frame, dim):
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    resized = cv2.resize(gray, dim)
+def resize(frame, dim):
+    if len(frame.shape) >= 3:
+        raise ValueError('frame must be 2 dimensional (grayscale), but current shape is: ', frame.shape)
+    resized = cv2.resize(frame, dim)
     
     return resized
 
@@ -55,7 +56,7 @@ def gradients(frames):
 def spatiotemporal_cubes(frames, dim):
     tiled_frames = []
     for frame in frames:
-        converted_frame = convert_and_resize(frame, dim)
+        converted_frame = resize(frame, dim)
         tiled_frames.append(divide_in_tiles(converted_frame))
     
     
