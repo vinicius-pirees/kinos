@@ -5,3 +5,4 @@ scikit-learn==0.23.1
 tensorflow==1.4.0
 keras==2.0.8
 keras-layer-normalization==0.14.0
+kafka-python==2.0.1
