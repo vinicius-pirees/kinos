@@ -2,8 +2,8 @@ import sys
 sys.path.append('/home/vinicius/git-projects/phaino')
 
 
-from producers import ImageProducer
-from consumers import ImageConsumer
+from phaino.streams.producers import ImageProducer
+from phaino.streams.consumers import ImageConsumer
 from phaino.utils.spatio_temporal_gradient_features import generate_features
 from phaino.utils.commons import frame_to_gray, reduce_frame
 

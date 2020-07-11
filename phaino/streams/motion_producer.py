@@ -1,5 +1,8 @@
+import sys
+sys.path.append('/home/vinicius/git-projects/phaino')
+
 from phaino.utils.motion_detection import MotionDetection
-from producers import ImageProducer
+from phaino.streams.producers import ImageProducer
 
 
 

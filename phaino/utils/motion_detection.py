@@ -1,7 +1,7 @@
 import cv2
 
 class MotionDetection:
-    def __init__(self, min_movement_area=40, weight=0.6)
+    def __init__(self, min_movement_area=40, weight=0.6):
         self.weighted_avg = None
         self.min_movement_area = min_movement_area
         self.weight = weight
@@ -14,7 +14,7 @@ class MotionDetection:
         if self.weighted_avg is None:
             self.weighted_avg = frame_gray.copy().astype("float")
 
-        frameDelta = cv2.absdiff(frame_gray, cv2.convertScaleAbs(avg))
+        frameDelta = cv2.absdiff(frame_gray, cv2.convertScaleAbs(self.weighted_avg))
         cv2.accumulateWeighted(frame_gray, self.weighted_avg,  self.weight)
 
         thresh = cv2.threshold(frameDelta, 5, 255, cv2.THRESH_BINARY)[1]
