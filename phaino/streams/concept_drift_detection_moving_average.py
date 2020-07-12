@@ -3,8 +3,8 @@ sys.path.append('/home/vinicius/git-projects/phaino')
 
 
 from phaino.models.gaussian import Gaussian
-from producers import ImageProducer
-from consumers import ImageConsumer
+from phaino.streams.producers import ImageProducer
+from phaino.streams.consumers import ImageConsumer
 
 
 class ConceptDriftMovingAvg:

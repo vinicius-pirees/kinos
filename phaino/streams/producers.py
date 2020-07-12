@@ -1,21 +1,34 @@
+import os
+import sys
+sys.path.append('/home/vinicius/git-projects/phaino')
+
+
+
 from kafka import KafkaProducer
 from kafka.errors import KafkaError
 import cv2
 import numpy as np
 from io import BytesIO
+import json
+from datetime import datetime
+
+from phaino.utils.commons import frame_to_bytes_str, frame_from_bytes_str
+
 
 
 class ImageProducer:
     def __init__(self, bootstrap_servers, topic):
         self.bootstrap_servers = bootstrap_servers
         self.topic = topic
-        self.producer = KafkaProducer(bootstrap_servers=bootstrap_servers)
+        self.producer = KafkaProducer(bootstrap_servers=bootstrap_servers, 
+                                      value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
     def send_frame(self, frame):
-        np_bytes = BytesIO()
-        np.save(np_bytes, frame, allow_pickle=True)
-        np_bytes = np_bytes.getvalue()
-        self.producer.send(self.topic, np_bytes)
+        dict_object = {}
+        dict_object['timestamp'] = datetime.timestamp(datetime.now())
+        dict_object['data'] =  frame_to_bytes_str(frame)
+
+        self.producer.send(self.topic, dict_object)
         
 
 class VideoProducer(ImageProducer):

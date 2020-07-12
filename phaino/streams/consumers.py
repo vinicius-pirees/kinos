@@ -1,9 +1,16 @@
+import os
+import sys
+sys.path.append('/home/vinicius/git-projects/phaino')
+
 from kafka import KafkaConsumer
 from kafka.errors import KafkaError
 import cv2
 import numpy as np
 from io import BytesIO
 
+
+
+from phaino.utils.commons import frame_to_bytes_str, frame_from_bytes_str
 
 
 class ImageConsumer:
@@ -13,7 +20,8 @@ class ImageConsumer:
         self.consumer = KafkaConsumer(topic,
                                       bootstrap_servers=bootstrap_servers,
                                       auto_offset_reset='earliest',
-                                      enable_auto_commit=True)
+                                      enable_auto_commit=True,
+                                      value_deserializer=lambda x: json.loads(x.decode('utf-8')))
 
         
     def get_consumer(self):
@@ -21,9 +29,7 @@ class ImageConsumer:
     
     def get_one_image(self):
         for msg in self.consumer:
-            load_bytes = BytesIO(msg.value)
-            loaded_np = np.load(load_bytes, allow_pickle=True)
-            return loaded_np
+            return frame_from_bytes_str(msg['data'])
     
     
     
@@ -36,7 +42,8 @@ class ImageFiniteConsumer:
                                       bootstrap_servers=bootstrap_servers,
                                       consumer_timeout_ms=10000,
                                       auto_offset_reset='earliest',
-                                      enable_auto_commit=True)
+                                      enable_auto_commit=True,
+                                      value_deserializer=lambda x: json.loads(x.decode('utf-8')))
         
         
     def get_consumer(self):
@@ -45,16 +52,13 @@ class ImageFiniteConsumer:
     
     def get_one_image(self):
         for msg in self.consumer:
-            load_bytes = BytesIO(msg.value)
-            loaded_np = np.load(load_bytes, allow_pickle=True)
-            return loaded_np
+            return frame_from_bytes_str(msg['data'])
         
     def get_all_images(self):
         images = []
         for msg in self.consumer:
-            load_bytes = BytesIO(msg.value)
-            loaded_np = np.load(load_bytes, allow_pickle=True)
+            image = frame_from_bytes_str(msg['data'])
 
-            images.append(loaded_np)
+            images.append(image)
         return images
         
