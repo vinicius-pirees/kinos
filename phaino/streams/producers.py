@@ -23,10 +23,13 @@ class ImageProducer:
         self.producer = KafkaProducer(bootstrap_servers=bootstrap_servers, 
                                       value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
-    def send_frame(self, frame):
+    def send_frame(self, frame, extra_fields={}):
         dict_object = {}
         dict_object['timestamp'] = datetime.timestamp(datetime.now())
         dict_object['data'] =  frame_to_bytes_str(frame)
+        
+        for key, value in extra_fields.items():
+            dict_object[key] = value
 
         self.producer.send(self.topic, dict_object)
         
