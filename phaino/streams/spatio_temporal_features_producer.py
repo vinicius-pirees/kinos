@@ -38,9 +38,19 @@ class SpatioTemporalFeaturesProducer:
                 features = generate_features(frame_sequence, self.cube_depth, self.tile_size)
                 result = features.reshape(1, features.shape[0]*features.shape[1])
                 
+                
+                ## Keep original frames
+                #jpeg encode
+                jpeg_frames = np.array([cv2.imencode('.jpg', x)[1] for x in frame_sequence])
+                origin_frames = frame_to_bytes_str(jpeg_frames)
+                
+                
                 source_end_timestamp = msg.value['timestamp']
                 
-                extra_fields = {'source_end_timestamp': source_end_timestamp, 'source_start_timestamp': source_start_timestamp}
+                extra_fields = {'origin_frames':origin_frames, 
+                                'source_end_timestamp': source_end_timestamp, 
+                                'source_start_timestamp': source_start_timestamp}
+                
                 self.producer.send_frame(result, extra_fields=extra_fields) 
                 
                 source_start_timestamp = source_end_timestamp

@@ -21,7 +21,10 @@ class ImageProducer:
         self.bootstrap_servers = bootstrap_servers
         self.topic = topic
         self.producer = KafkaProducer(bootstrap_servers=bootstrap_servers, 
-                                      value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+                                      value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+                                      compression_type='gzip',
+                                      batch_size=20000000,
+                                      max_request_size=5048576)
 
     def send_frame(self, frame, extra_fields={}):
         dict_object = {}

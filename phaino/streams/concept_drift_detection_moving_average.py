@@ -5,6 +5,7 @@ sys.path.append('/home/vinicius/git-projects/phaino')
 from phaino.models.gaussian import Gaussian
 from phaino.streams.producers import ImageProducer
 from phaino.streams.consumers import ImageConsumer
+import numpy as np
 
 
 class ConceptDriftMovingAvg:
@@ -32,7 +33,7 @@ class ConceptDriftMovingAvg:
         return self.current_mean, self.current_variance, self.current_std
     
     def evaluate_and_update(self, x):
-        result = gaussian.evaluate(x, self.current_mean, self.current_std)
+        result = self.gaussian.evaluate(x, self.current_mean, self.current_std)
         self.update_moving_measures(x)
         
         return result
@@ -46,6 +47,7 @@ class ConceptDriftMovingAvg:
             result = self.evaluate_and_update(feature)
             
             if result > treshold:
+                pass
                 #Anomaly, if more than 2 minutes, then concept has drifted
                 #producer.send(source_image)
             
