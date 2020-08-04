@@ -6,6 +6,14 @@ from phaino.utils.spatio_temporal_gradient_features import process_frames
 from phaino.utils.commons import frame_to_gray, reduce_frame
 import pickle
 
+def measures(X):
+        means = X.mean(axis=0)
+        variances = np.mean((X - means) ** 2, axis=0 )
+        stds = np.sqrt(variances)
+
+        return means, variances, stds
+    
+    
 
 class Gaussian:
     
@@ -15,26 +23,27 @@ class Gaussian:
         self.variances = None
         self.stds = None
     
-    def measures(self, X):
-        means = X.mean(axis=0)
-        variances = np.mean((X - means) ** 2, axis=0 )
-        stds = np.sqrt(variances)
+    
+    def update_model(self, X):
+        self.means, self.variances, self.stds = measures(X)
 
-        return means, variances, stds
-
-
+    def get_measures(self):
+        return self.means, self.variances, self.stds
     
     
-    def evaluate(self, x, means, stds):
+    def evaluate(self, x):
         calc_gaussian = lambda x, mu, sigma: (1.0 / (sigma * np.sqrt(2 * np.pi))) * np.exp( -(x - mu)**2 / (2 * sigma**2) )
 
-        gaussian  = calc_gaussian(x, means, stds)
+        gaussian  = calc_gaussian(x, self.means, self.stds)
         #return np.sum(np.log(gaussian))
 
         # Test approach
         result = np.log(gaussian)
-        result[result == -inf] = -1000000
-        result[result == inf] = 1000000 
+        
+        
+        result[result == -inf] = -10000000
+        result[result == inf] = 10000000 
+        result = np.nan_to_num(result)
 
         return np.sum(result) 
     
@@ -80,21 +89,18 @@ class Gaussian:
 
     
     def get_training_set(self, input_frames):
-        return process_frames(input_frames)
+        return self.process_frames(input_frames)
     
     
     def use_last_model(self, path):
-        model = load_model(path)
+        model = self.load_model(path)
         self.means = model['means']
         self.variances = model['variances']
         self.stds = model['stds']
     
     def fit(self, training_set):
-        means, variances, stds = measures(training_set)
-        save_model(means, variances, stds)
-        self.means = means
-        self.variances = variances
-        self.stds = stds
+        self.update_model(training_set)
+        self.save_model(self.means, self.variances, self.stds)
     
         
     def save_model(self, means, variances, stds):

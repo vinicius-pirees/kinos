@@ -1,6 +1,7 @@
 import sys
 sys.path.append('/home/vinicius/git-projects/phaino')
-
+import numpy as np
+import cv2
 
 from phaino.streams.producers import ImageProducer
 from phaino.streams.consumers import ImageConsumer
@@ -21,10 +22,12 @@ class SpatioTemporalFeaturesProducer:
     def send_frames(self):       
         counter = 0
         frame_sequence = []
+        original_frame_sequence = []
       
         for msg in self.consumer.get_consumer():
             
             frame = frame_from_bytes_str(msg.value['data'])
+            original_frame_sequence.append(frame)
             
               
             if counter%self.cube_depth == 0 and counter!=0:
@@ -39,9 +42,9 @@ class SpatioTemporalFeaturesProducer:
                 result = features.reshape(1, features.shape[0]*features.shape[1])
                 
                 
-                ## Keep original frames
+                ##Keep original frames
                 #jpeg encode
-                jpeg_frames = np.array([cv2.imencode('.jpg', x)[1] for x in frame_sequence])
+                jpeg_frames = np.array([cv2.imencode('.jpg', x)[1] for x in original_frame_sequence])
                 origin_frames = frame_to_bytes_str(jpeg_frames)
                 
                 
@@ -54,7 +57,8 @@ class SpatioTemporalFeaturesProducer:
                 self.producer.send_frame(result, extra_fields=extra_fields) 
                 
                 source_start_timestamp = source_end_timestamp
-                # Reset frame sequence
+                # Reset frame sequences
+                original_frame_sequence = []
                 frame_sequence = []
                 counter+=1
             else:

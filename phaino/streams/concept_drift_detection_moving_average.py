@@ -16,6 +16,8 @@ class ConceptDriftMovingAvg:
         self.current_variance = np.array([])
         self.current_std = np.array([])
         self.gaussian = Gaussian()
+        self.max_cost = None
+        self.min_cost = None
         
     def update_moving_measures(self, x, beta=0.998):
         if self.current_mean.size==0:
@@ -32,9 +34,9 @@ class ConceptDriftMovingAvg:
     def get_measures(self):
         return self.current_mean, self.current_variance, self.current_std
     
-    def evaluate_and_update(self, x):
+    def evaluate_and_update(self, x, beta=0.998):
         result = self.gaussian.evaluate(x, self.current_mean, self.current_std)
-        self.update_moving_measures(x)
+        self.update_moving_measures(x, beta)
         
         return result
     
@@ -50,4 +52,30 @@ class ConceptDriftMovingAvg:
                 pass
                 #Anomaly, if more than 2 minutes, then concept has drifted
                 #producer.send(source_image)
+                
+    def update_max_min(self, value):
+        if self.max_cost == None:
+            self.max_cost = value
+            self.min_cost = value
+        else:
+            if value < self.min_cost:
+                self.min_cost = value
+            
+            if value > self.max_cost:
+                self.max_cost = value
+                
+    def get_min_cost(self):
+        return self.min_cost
+    
+    def get_max_cost(self):
+        return self.max_cost
+    
+    def get_current_reg_score(self, value):
+        sa = (value - self.min_cost) / (self.max_cost - self.min_cost)
+        regularity_score = 1.0 - sa
+        return regularity_score
+    
+    def reset_cost(self):
+        self.max_cost = None
+        self.min_cost = None
             

@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from io import BytesIO
 import base64
+from confluent_kafka.admin import AdminClient, NewTopic
 
 
 def frame_to_gray(frame):
@@ -34,3 +35,28 @@ def frame_to_bytes_str_simple(frame):
 
 def frame_from_bytes_str_simple(frame_bytes_str, dtype_str, shape):
 	return np.frombuffer(base64.b64decode(frame_bytes_str), dtype=dtype_str).reshape(shape)
+
+
+
+def create_topic(bootstrap_servers, topic_name, retention_ms=604800000, segment_bytes=1073741824):
+    a = AdminClient({'bootstrap.servers': ','.join(bootstrap_servers)})
+    
+    topics = []
+    t = NewTopic(topic_name, num_partitions=1, replication_factor=1, config={'retention.ms': str(retention_ms),
+                                                                             'segment.bytes': str(segment_bytes)})
+    topics.append(t)
+
+    # Call create_topics to asynchronously create topics, a dict
+    # of <topic,future> is returned.
+    fs = a.create_topics(topics, request_timeout=10)
+
+    # Wait for operation to finish.
+    # Timeouts are preferably controlled by passing request_timeout=15.0
+    # to the create_topics() call.
+    # All futures will finish at the same time.
+    for topic, f in fs.items():
+        try:
+            f.result()  # The result itself is None
+            print("Topic {} created".format(topic))
+        except Exception as e:
+            print("Failed to create topic {}: {}".format(topic, e))
