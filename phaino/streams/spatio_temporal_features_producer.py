@@ -18,6 +18,7 @@ class SpatioTemporalFeaturesProducer:
         self.producer = ImageProducer(bootstrap_servers, target_topic)
         self.cube_depth = cube_depth
         self.tile_size = tile_size
+        self.frame_counter = 0
           
     def send_frames(self):       
         counter = 0
@@ -48,23 +49,30 @@ class SpatioTemporalFeaturesProducer:
                 origin_frames = frame_to_bytes_str(jpeg_frames)
                 
                 
+                end_frame_number = self.frame_counter
                 source_end_timestamp = msg.value['timestamp']
                 
                 extra_fields = {'origin_frames':origin_frames, 
+                                'start_frame_number': start_frame_number,
+                                'end_frame_number': end_frame_number,
                                 'source_end_timestamp': source_end_timestamp, 
                                 'source_start_timestamp': source_start_timestamp}
                 
                 self.producer.send_frame(result, extra_fields=extra_fields) 
                 
+                start_frame_number = end_frame_number
                 source_start_timestamp = source_end_timestamp
                 # Reset frame sequences
                 original_frame_sequence = []
                 frame_sequence = []
                 counter+=1
+                self.frame_counter+=1
             else:
                 if counter == 0:
+                    start_frame_number = self.frame_counter
                     source_start_timestamp = msg.value['timestamp']
                     counter+=1
+                    self.frame_counter+=1
                     continue
             
                 # To grayscale
@@ -73,6 +81,7 @@ class SpatioTemporalFeaturesProducer:
                 reduced_frame = reduce_frame(frame)
                 frame_sequence.append(reduced_frame)
                 counter+=1
+                self.frame_counter+=1
             
 
       

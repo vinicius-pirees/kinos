@@ -38,12 +38,13 @@ def frame_from_bytes_str_simple(frame_bytes_str, dtype_str, shape):
 
 
 
-def create_topic(bootstrap_servers, topic_name, retention_ms=604800000, segment_bytes=1073741824):
+def create_topic(bootstrap_servers, topic_name, retention_ms=604800000, segment_bytes=1073741824, max_message_bytes=50048576):
     a = AdminClient({'bootstrap.servers': ','.join(bootstrap_servers)})
     
     topics = []
     t = NewTopic(topic_name, num_partitions=1, replication_factor=1, config={'retention.ms': str(retention_ms),
-                                                                             'segment.bytes': str(segment_bytes)})
+                                                                             'segment.bytes': str(segment_bytes),
+                                                                            'max.message.bytes': str(max_message_bytes)})
     topics.append(t)
 
     # Call create_topics to asynchronously create topics, a dict
