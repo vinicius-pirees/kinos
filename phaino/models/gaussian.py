@@ -1,10 +1,18 @@
-
+import os
 import numpy as np
 import scipy
 from numpy import inf
 from phaino.utils.spatio_temporal_gradient_features import process_frames
 from phaino.utils.commons import frame_to_gray, reduce_frame
 import pickle
+from datetime import datetime
+from phaino.config.config import PhainoConfiguration
+
+config = PhainoConfiguration()
+phaino_config = config.get_config()
+MODELS_DIR = phaino_config['models']['directory']
+MODEL_DIR = os.path.join(os.path.join(MODELS_DIR, 'gaussian'))
+
 
 def measures(X):
         means = X.mean(axis=0)
@@ -13,7 +21,8 @@ def measures(X):
 
         return means, variances, stds
     
-    
+def init_model_dir(model_dir):
+    os.makedirs(model_dir, exist_ok=True)    
 
 class Gaussian:
     
@@ -22,6 +31,8 @@ class Gaussian:
         self.means = None
         self.variances = None
         self.stds = None
+        self.model_dir = MODEL_DIR
+        init_model_dir(MODEL_DIR)
     
     
     def update_model(self, X):
@@ -101,15 +112,33 @@ class Gaussian:
     def fit(self, training_set):
         self.update_model(training_set)
         self.save_model(self.means, self.variances, self.stds)
-    
         
+    def get_last_model_path(self):
+        model_list = os.listdir(self.model_dir) 
+        if len(model_list) == 0:
+            print('No model yet')
+        else:
+            model_list.sort()
+            last_model = model_list[-1]
+            return os.path.join(self.model_dir,last_model)
+    
+    def new_model_path(self, name):
+        return os.path.join(self.model_dir, name + '_' +  datetime.now().strftime("%Y%m%d_%H%M%S"))  
+    
     def save_model(self, means, variances, stds):
-        with open('gaussian_model_date.pickle', 'wb') as handle:
+        with open(self.new_model_path('gaussian'), 'wb') as handle:
             pickle.dump({'means': means, 'variances': variances, 'stds': stds}, handle, protocol=pickle.HIGHEST_PROTOCOL)
-            
+         
+    def load_last_model(self):
+        path = self.get_last_model_path()
+        return self.load_model(path)
+        
+        
     def load_model(self, path):
-        with open('gaussian_model_date.pickle', 'rb') as handle:
+        with open(path, 'rb') as handle:
             model = pickle.load(handle)
-        return model
+        self.means = model['means']
+        self.variances = model['variances']
+        self.stds = model['stds']
         
     

@@ -41,7 +41,7 @@ class ImageFiniteConsumer:
         self.topic = topic
         self.consumer = KafkaConsumer(topic,
                                       bootstrap_servers=bootstrap_servers,
-                                      consumer_timeout_ms=10000,
+                                      consumer_timeout_ms=1000,
                                       auto_offset_reset='earliest',
                                       enable_auto_commit=True,
                                       value_deserializer=lambda x: json.loads(x.decode('utf-8')))
