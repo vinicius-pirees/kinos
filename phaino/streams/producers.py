@@ -15,6 +15,20 @@ from datetime import datetime
 from phaino.utils.commons import frame_to_bytes_str, frame_from_bytes_str
 
 
+#Todo: use GenericProducer as base class
+class GenericProducer:
+    def __init__(self, bootstrap_servers, topic):
+        self.bootstrap_servers = bootstrap_servers
+        self.topic = topic
+        self.producer = KafkaProducer(bootstrap_servers=bootstrap_servers, 
+                                      value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+                                      compression_type='gzip',
+                                      batch_size=20000000,
+                                      max_request_size=5048576)
+
+    def send(self, dict_object):
+        self.producer.send(self.topic, dict_object)
+
 
 class ImageProducer:
     def __init__(self, bootstrap_servers, topic):
