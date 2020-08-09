@@ -12,13 +12,14 @@ from phaino.utils.commons import frame_to_bytes_str, frame_from_bytes_str
 
 
 class SequenceFramesFeaturesProducer:
-    def __init__(self, bootstrap_servers, source_topic, target_topic, sequence_size, output_frame_size, to_grayscale=False):
+    def __init__(self, bootstrap_servers, source_topic, target_topic, sequence_size, output_frame_size, to_grayscale=True, debug=False):
         self.consumer = ImageConsumer(bootstrap_servers, source_topic)
-        self.producer = ImageProducer(bootstrap_servers, target_topic)
+        self.producer = ImageProducer(bootstrap_servers, target_topic, debug=debug)
         self.sequence_size = sequence_size
         self.output_frame_size = output_frame_size
         self.to_grayscale = to_grayscale
         self.frame_counter = 0
+      
                  
     def send_frames(self):       
         counter = 0
@@ -36,7 +37,7 @@ class SequenceFramesFeaturesProducer:
                 # Resize
                 frame = cv2.resize(frame, self.output_frame_size)
                 # To grayscale
-                if to_grayscale:
+                if self.to_grayscale:
                     frame = frame_to_gray(frame)
                 # Divide pixels by 255
                 reduced_frame = reduce_frame(frame)
@@ -89,7 +90,7 @@ class SequenceFramesFeaturesProducer:
                 # Resize
                 frame = cv2.resize(frame, self.output_frame_size)
                 # To grayscale
-                if to_grayscale:
+                if self.to_grayscale:
                     frame = frame_to_gray(frame)
                 # Divide pixels by 255
                 reduced_frame = reduce_frame(frame)

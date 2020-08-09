@@ -17,28 +17,39 @@ from phaino.utils.commons import frame_to_bytes_str, frame_from_bytes_str
 
 #Todo: use GenericProducer as base class
 class GenericProducer:
-    def __init__(self, bootstrap_servers, topic):
+    def __init__(self, bootstrap_servers, topic, max_message_size_mb=8, debug=False):
         self.bootstrap_servers = bootstrap_servers
         self.topic = topic
+        self.debug = debug
+        max_message_size_bytes = max_message_size_mb * 1024 * 1024
         self.producer = KafkaProducer(bootstrap_servers=bootstrap_servers, 
                                       value_serializer=lambda v: json.dumps(v).encode('utf-8'),
                                       compression_type='gzip',
                                       batch_size=20000000,
-                                      max_request_size=5048576)
+                                      max_request_size=max_message_size_bytes)
 
     def send(self, dict_object):
-        self.producer.send(self.topic, dict_object)
+        if self.debug:
+             # Asynchronous by default
+            future = self.producer.send(self.topic, dict_object)
+            # Block for 'synchronous' sends
+            record_metadata = future.get(timeout=10)   
+        else:
+            self.producer.send(self.topic, dict_object)
 
 
 class ImageProducer:
-    def __init__(self, bootstrap_servers, topic):
+    def __init__(self, bootstrap_servers, topic, max_message_size_mb=8,debug=False):
         self.bootstrap_servers = bootstrap_servers
         self.topic = topic
+        self.debug = debug
+        
+        max_message_size_bytes = max_message_size_mb * 1024 * 1024
         self.producer = KafkaProducer(bootstrap_servers=bootstrap_servers, 
                                       value_serializer=lambda v: json.dumps(v).encode('utf-8'),
                                       compression_type='gzip',
                                       batch_size=20000000,
-                                      max_request_size=5048576)
+                                      max_request_size=max_message_size_bytes)
 
     def send_frame(self, frame, extra_fields={}):
         dict_object = {}
@@ -47,8 +58,16 @@ class ImageProducer:
         
         for key, value in extra_fields.items():
             dict_object[key] = value
+            
+            
+        if self.debug:
+             # Asynchronous by default
+            future = self.producer.send(self.topic, dict_object)
+            # Block for 'synchronous' sends
+            record_metadata = future.get(timeout=10)   
+        else:
+            self.producer.send(self.topic, dict_object)
 
-        self.producer.send(self.topic, dict_object)
         
 
 class VideoProducer(ImageProducer):
