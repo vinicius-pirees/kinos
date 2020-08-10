@@ -38,7 +38,7 @@ class LSTMAutoEncoder:
         return reduced_frame
 
 
-    def input_frames_transform(train_frames)
+    def input_frames_transform(train_frames):
         input_frames = []
         for frame in range(0,train_frames.shape[0]):
             input_frames.append(lstm_autoencoder_frame(train_frames[frame], (256,256)))
@@ -110,7 +110,7 @@ class LSTMAutoEncoder:
     
     
     def get_training_set(self, input_frames):
-        return get_clips(frames_list=input_frames, sequence_size=self.sequence_size)
+        return self.get_clips(frames_list=input_frames, sequence_size=self.sequence_size)
     
     
     
@@ -122,10 +122,10 @@ class LSTMAutoEncoder:
         
         
         
-    def new_model_path(model_dir,name):
+    def new_model_path(self, model_dir,name):
         return os.path.join(model_dir, name + '_' +  datetime.now().strftime("%Y%m%d_%H%M%S"))
     
-    def get_last_model_path(model_dir):
+    def get_last_model_path(self, model_dir):
         model_list = os.listdir(model_dir) 
         if len(model_list) == 0:
             print('No model yet')
@@ -140,7 +140,7 @@ class LSTMAutoEncoder:
 
 
 
-    def fit_new_model(training_set, batch_size_, epochs_, model_dir):
+    def fit_new_model(self, training_set, batch_size_, epochs_, model_dir):
         training_set = np.array(training_set)
         seq = Sequential()
         seq.add(TimeDistributed(Conv2D(128, (11, 11), strides=4, padding="same"), batch_input_shape=(None, 10, 256, 256, 1)))
@@ -164,7 +164,7 @@ class LSTMAutoEncoder:
         seq.compile(loss='mse', optimizer=keras.optimizers.Adam(lr=1e-4, decay=1e-5, epsilon=1e-6))
         seq.fit(training_set, training_set,
                 batch_size=batch_size_, epochs=epochs_, shuffle=False)
-        seq.save(new_model_path(model_dir,'lstm'))
+        seq.save(self.new_model_path(model_dir,'lstm'))
         
         
         
@@ -173,19 +173,19 @@ class LSTMAutoEncoder:
     
     
     
-    def fit_new_model(self, training_set):
-        fit_new_model(training_set, self.batch_size, self,epochs, self.model_dir)
+    def fit(self, training_set):
+        self.fit_new_model(training_set, self.batch_size, self.epochs, self.model_dir)
         
         
         
-    def get_last_model(model_dir):
+    def get_last_model(self, model_dir):
         ##Todo if model is not present
-        last_model_path = get_last_model_path(model_dir)
-        model = get_model(last_model_path)
+        last_model_path = self.get_last_model_path(model_dir)
+        model = self.get_model(last_model_path)
         return model
     
-    def use_last_model(self)
-        model = get_last_model(self.model_dir)
+    def use_last_model(self):
+        model = self.get_last_model(self.model_dir)
         self.model = model
         
         
