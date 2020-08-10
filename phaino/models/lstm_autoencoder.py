@@ -30,6 +30,9 @@ class LSTMAutoEncoder:
         self.max_cost = None
         self.min_cost = None
         
+    def get_model_in_use(self):
+        return self.model
+        
         
     def lstm_autoencoder_frame(frame, input_size):
         frame = cv2.resize(frame, input_size)
@@ -134,7 +137,7 @@ class LSTMAutoEncoder:
             last_model = model_list[-1]
             return os.path.join(model_dir,last_model)
 
-    def get_model(model_path):
+    def get_model(self, model_path):
         return load_model(model_path, custom_objects={'LayerNormalization': LayerNormalization})
 
 
@@ -172,9 +175,20 @@ class LSTMAutoEncoder:
         pass
     
     
+    def predict(self, frame_sequence):
+        frame_sequence = np.reshape(frame_sequence, (1,) + frame_sequence.shape)
+
+        reconstructed_sequence = self.model.predict(feat,batch_size=self.batch_size)
+        reconstruction_cost = np.linalg.norm(np.subtract(frame_sequence,reconstructed_sequence))
+        return reconstruction_cost
+    
+    
     
     def fit(self, training_set):
         self.fit_new_model(training_set, self.batch_size, self.epochs, self.model_dir)
+        
+        
+    
         
         
         

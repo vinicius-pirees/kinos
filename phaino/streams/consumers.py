@@ -22,7 +22,7 @@ class GenericConsumer:
         if finite:
             consumer_timeout_ms=1000
         else:
-            consumer_timeout_ms=None
+            consumer_timeout_ms=float('inf')
             
         self.consumer = KafkaConsumer(topic,
                                       bootstrap_servers=bootstrap_servers,
@@ -47,7 +47,7 @@ class ImageConsumer:
         if finite:
             consumer_timeout_ms=1000
         else:
-            consumer_timeout_ms=None
+            consumer_timeout_ms=float('inf')
             
         self.consumer = KafkaConsumer(topic,
                                       bootstrap_servers=bootstrap_servers,
