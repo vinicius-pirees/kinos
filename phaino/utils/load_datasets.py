@@ -65,9 +65,15 @@ def ucsdped_test_video(dataset_dir, ucsd_version, video_number):
 
     return np.array(images)
 
+
+def ucsdped_get_num_frames(videos_path, video_name):
+    images =  [x for x in os.listdir(os.path.join(videos_path, video_name)) if 'DS' not in x]
+    return len(images)
+
+
 def ucsdped_ground_truths(ucsd_version):
-    train_path = os.path.join(dataset_dir, 'UCSD_Anomaly_Dataset.v1p2','UCSDped' + str(ucsd_version),'Test')
-    gt_file =  os.path.join(train_path, 'UCSDped'+ str(ucsd_version) + '.m')
+    test_path = os.path.join(dataset_dir, 'UCSD_Anomaly_Dataset.v1p2','UCSDped' + str(ucsd_version),'Test')
+    gt_file =  os.path.join(test_path, 'UCSDped'+ str(ucsd_version) + '.m')
     gt_dict = {}
     index=1
     f = open(gt_file, "r")
@@ -77,13 +83,16 @@ def ucsdped_ground_truths(ucsd_version):
             
             video_number_str = str(index).zfill(3)
             video_name = 'Test' + video_number_str
+            total_frames = ucsdped_get_num_frames(test_path, video_name)
+            gt_dict[video_name] = {}
+            gt_dict[video_name]["total_frames"] = total_frames
+            
             intervals = frames.group(1).split(',')
-            gt_dict[video_name] = []
+            gt_dict[video_name]["anomalies"] = []
             for interval in intervals:
                 start_end = interval.strip().split(':')
                 
-                gt_dict[video_name].append({'start':start_end[0], 'end': start_end[1]})
+                gt_dict[video_name]["anomalies"].append({'start':start_end[0], 'end': start_end[1]})
 
             index+=1
     return gt_dict
-
