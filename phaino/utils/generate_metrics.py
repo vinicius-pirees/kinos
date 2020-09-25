@@ -32,9 +32,9 @@ from sklearn import metrics
 
 # {"start": 10, "end": 15}
 def validate_gt_interval(interval):
-	if interval['start'] >= interval['end']:
-		raise ValueError("Start frame number can't be greater than the End one." + 
-						 "Start: {}, End {}".format(interval['start'], interval['end']))
+    if interval['start'] >= interval['end']:
+        raise ValueError("Start frame number can't be greater than the End one." + 
+                         "Start: {}, End {}".format(interval['start'], interval['end']))
 
 
 
@@ -50,9 +50,9 @@ def get_model_scores_map(pred):
     for frame, score in pred.items():
         score = np.round(score, 3)
         if score not in model_scores_map.keys():
-            model_scores_map[score] = [frame]
+            model_scores_map[score] = [int(frame)]
         else:
-            model_scores_map[score].append(frame)
+            model_scores_map[score].append(int(frame))
     return model_scores_map
 
 
@@ -67,14 +67,14 @@ def get_video_anomaly_frames(gts_video):
     anomaly_frames = set()
 
     for interval in gts_video['anomalies']:
-        for frame_number in range(interval['start'], interval['end'] + 1):
+        for frame_number in range(int(interval['start']), int(interval['end']) + 1):
             anomaly_frames.add(frame_number)
     return anomaly_frames
 
 
-def get_video_normal_frames(gts_video):
+def get_video_normal_frames(gts_video, anomaly_frames):
     normal_frames = set()
-    for frame_number in range(1, gts_video['total_frames'] + 1):
+    for frame_number in range(1, int(gts_video['total_frames']) + 1):
         if frame_number not in anomaly_frames:
             normal_frames.add(frame_number)
     return normal_frames
@@ -117,53 +117,55 @@ def get_video_results(preds, anomaly_frames, normal_frames):
 
 
 def get_overall_result(gts, preds):
-	results_dict = {}
+    results_dict = {}
 
 
-	all_scores = []
+    all_scores = []
     for video, pred_scores in preds.items():
         for frame, score in pred_scores.items():
             all_scores.append(score)
 
 
-	for score in all_scores:
-	    score = np.round(score, 3)
-	    if results_dict.get(score) is None:
-	        results_dict[score] = {"tp":0,"fp":0,"fn":0,"tn":0}
+    for score in all_scores:
+        score = np.round(score, 3)
+        if results_dict.get(score) is None:
+            results_dict[score] = {"tp":0,"fp":0,"fn":0,"tn":0}
 
 
 
-	for video in gts.keys():
-	    anomaly_frames = get_video_anomaly_frames(gts[video])
-	    normal_frames = get_video_normal_frames(gts[video])
-	    
-	    
-	    video_predictions = pred.get(video)
-	    scores_map = {}
-	    if video_predictions is not None:
-	        scores_map = get_model_scores_map(video_predictions)
-	    
-	    for score in results_dict.keys():
-	        if scores_map.get(score) is None:
-	            results_dict[score]['fn'] = results_dict[score]['fn']  + len(anomaly_frames)
-	            results_dict[score]['tn'] = results_dict[score]['tn'] + len(normal_frames)
-	        else:
-	            pred_frames  =  get_pred_frames_above_threshold(scores_map, score)
-	            video_results = get_video_results(pred_frames, anomaly_frames, normal_frames)
-	            results_dict[score]['tp'] = results_dict[score]['tp'] + video_results['tp']
-	            results_dict[score]['fp'] = results_dict[score]['fp'] + video_results['fp']
-	            results_dict[score]['fn'] = results_dict[score]['fn'] + video_results['fn']
-	            results_dict[score]['tn'] = results_dict[score]['tn'] + video_results['tn']
+    for video in gts.keys():
+        anomaly_frames = get_video_anomaly_frames(gts[video])
+        normal_frames = get_video_normal_frames(gts[video], anomaly_frames)
 
-	return results_dict
+
+        video_predictions = preds.get(video)
+        scores_map = {}
+        if video_predictions is not None:
+            scores_map = get_model_scores_map(video_predictions)
+
+        for score in results_dict.keys():
+            if scores_map.get(score) is None:
+                results_dict[score]['fn'] = results_dict[score]['fn']  + len(anomaly_frames)
+                results_dict[score]['tn'] = results_dict[score]['tn'] + len(normal_frames)
+            else:
+                pred_frames  =  get_pred_frames_above_threshold(scores_map, score)
+                video_results = get_video_results(pred_frames, anomaly_frames, normal_frames)
+                results_dict[score]['tp'] = results_dict[score]['tp'] + video_results['tp']
+                results_dict[score]['fp'] = results_dict[score]['fp'] + video_results['fp']
+                results_dict[score]['fn'] = results_dict[score]['fn'] + video_results['fn']
+                results_dict[score]['tn'] = results_dict[score]['tn'] + video_results['tn']
+
+    return results_dict
 
 
 
 def tpr_fpr_points(results_dict):
     tpr_list = []
     fpr_list = []
+    
+    thresholds = sorted(results_dict.keys())
 
-    for threshold in final_thresholds:
+    for threshold in thresholds:
         tpr = results_dict[threshold]['tp'] / (results_dict[threshold]['tp'] + results_dict[threshold]['fn'])
         fpr = results_dict[threshold]['fp'] / (results_dict[threshold]['fp'] + results_dict[threshold]['tn'])
 
@@ -175,8 +177,10 @@ def tpr_fpr_points(results_dict):
 def precision_recall_points(results_dict):
     recall_list = []
     precision_list = []
+    
+    thresholds = sorted(results_dict.keys())
 
-    for threshold in final_thresholds:
+    for threshold in thresholds:
         recall = results_dict[threshold]['tp'] / (results_dict[threshold]['tp'] + results_dict[threshold]['fn'])
         precision = results_dict[threshold]['tp'] / (results_dict[threshold]['tp'] + results_dict[threshold]['fp'])
 
@@ -187,22 +191,22 @@ def precision_recall_points(results_dict):
 
 
 def plot_roc(fpr_list, tpr_list):
-	plt.title('Receiver Operating Characteristic')
-	plt.plot(fpr_list, tpr_list, 'b', label = 'AUC = %0.2f' % metrics.auc(tpr_list, fpr_list))
-	plt.legend(loc = 'lower right')
-	plt.plot([0, 1], [0, 1],'r--')
-	plt.xlim([0, 1])
-	plt.ylim([0, 1])
-	plt.ylabel('True Positive Rate')
-	plt.xlabel('False Positive Rate')
-	plt.show()
+    plt.title('Receiver Operating Characteristic')
+    plt.plot(fpr_list, tpr_list, 'b', label = 'AUC = %0.2f' % metrics.auc(tpr_list, fpr_list))
+    plt.legend(loc = 'lower right')
+    plt.plot([0, 1], [0, 1],'r--')
+    plt.xlim([0, 1])
+    plt.ylim([0, 1])
+    plt.ylabel('True Positive Rate')
+    plt.xlabel('False Positive Rate')
+    plt.show()
 
 
 def plot_pr(recall_list, precision_list):
-	plt.title('Precision Recall')
-	plt.plot(recall_list, precision_list, label = None)
-	plt.xlim([0, 1])
-	plt.ylim([0, 1])
-	plt.ylabel('Precision')
-	plt.xlabel('Recall')
-	plt.show()
+    plt.title('Precision Recall')
+    plt.plot(recall_list, precision_list, label = None)
+    plt.xlim([0, 1])
+    plt.ylim([0, 1])
+    plt.ylabel('Precision')
+    plt.xlabel('Recall')
+    plt.show()

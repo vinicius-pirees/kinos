@@ -2,6 +2,7 @@ import cv2
 import os
 import sys
 import numpy as np
+import re
 
 
 def ucsdped_train_dataset(dataset_dir, ucsd_version):
@@ -71,7 +72,7 @@ def ucsdped_get_num_frames(videos_path, video_name):
     return len(images)
 
 
-def ucsdped_ground_truths(ucsd_version):
+def ucsdped_ground_truths(dataset_dir, ucsd_version):
     test_path = os.path.join(dataset_dir, 'UCSD_Anomaly_Dataset.v1p2','UCSDped' + str(ucsd_version),'Test')
     gt_file =  os.path.join(test_path, 'UCSDped'+ str(ucsd_version) + '.m')
     gt_dict = {}
