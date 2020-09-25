@@ -15,14 +15,17 @@ from phaino.utils.commons import frame_to_bytes_str, frame_from_bytes_str
 
 #Todo: use GenericConsumer as base class
 class GenericConsumer:
-    def __init__(self, bootstrap_servers, topic, finite=False):
+    def __init__(self, bootstrap_servers, topic, finite=False, set_consumer_timeout_ms=None):
         self.bootstrap_servers = bootstrap_servers
         self.topic = topic
         
         if finite:
             consumer_timeout_ms=1000
         else:
-            consumer_timeout_ms=float('inf')
+            if set_consumer_timeout_ms is None:
+              consumer_timeout_ms=float('inf')
+            else:
+              consumer_timeout_ms=set_consumer_timeout_ms
             
         self.consumer = KafkaConsumer(topic,
                                       bootstrap_servers=bootstrap_servers,
