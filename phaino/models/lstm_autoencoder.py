@@ -34,23 +34,23 @@ class LSTMAutoEncoder:
         return self.model
         
         
-    def lstm_autoencoder_frame(frame, input_size):
+    def lstm_autoencoder_frame(self, frame, input_size):
         frame = cv2.resize(frame, input_size)
         frame = frame_to_gray(frame)
         reduced_frame = reduce_frame(frame)
         return reduced_frame
 
 
-    def input_frames_transform(train_frames):
+    def input_frames_transform(self, train_frames):
         input_frames = []
         for frame in range(0,train_frames.shape[0]):
-            input_frames.append(lstm_autoencoder_frame(train_frames[frame], (256,256)))
+            input_frames.append(self.lstm_autoencoder_frame(train_frames[frame], (256,256)))
             
         return input_frames
     
     
     
-    def get_clips_by_stride(stride, frames_list, sequence_size):
+    def get_clips_by_stride(self, stride, frames_list, sequence_size):
         """ For data augmenting purposes.
         Parameters
         ----------
@@ -82,7 +82,7 @@ class LSTMAutoEncoder:
 
 
 
-    def get_clips(frames_list, sequence_size):
+    def get_clips(self, frames_list, sequence_size):
         """ 
         Parameters
         ----------
@@ -178,7 +178,7 @@ class LSTMAutoEncoder:
     def predict(self, frame_sequence):
         frame_sequence = np.reshape(frame_sequence, (1,) + frame_sequence.shape)
 
-        reconstructed_sequence = self.model.predict(feat,batch_size=self.batch_size)
+        reconstructed_sequence = self.model.predict(frame_sequence,batch_size=self.batch_size)
         reconstruction_cost = np.linalg.norm(np.subtract(frame_sequence,reconstructed_sequence))
         return reconstruction_cost
     

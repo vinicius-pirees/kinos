@@ -192,7 +192,7 @@ def precision_recall_points(results_dict):
 
 def plot_roc(fpr_list, tpr_list):
     plt.title('Receiver Operating Characteristic')
-    plt.plot(fpr_list, tpr_list, 'b', label = 'AUC = %0.2f' % metrics.auc(tpr_list, fpr_list))
+    plt.plot(fpr_list, tpr_list, 'b', label = 'AUC = %0.2f' % metrics.auc(fpr_list, tpr_list))
     plt.legend(loc = 'lower right')
     plt.plot([0, 1], [0, 1],'r--')
     plt.xlim([0, 1])
