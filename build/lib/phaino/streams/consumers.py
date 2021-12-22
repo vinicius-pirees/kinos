@@ -1,5 +1,6 @@
 import os
 import sys
+sys.path.append('/home/vinicius/git-projects/phaino')
 
 from kafka import KafkaConsumer
 from kafka.errors import KafkaError

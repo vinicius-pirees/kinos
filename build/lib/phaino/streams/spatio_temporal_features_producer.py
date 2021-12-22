@@ -1,4 +1,5 @@
 import sys
+sys.path.append('/home/vinicius/git-projects/phaino')
 import numpy as np
 import cv2
 

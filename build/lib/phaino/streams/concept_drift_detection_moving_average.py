@@ -1,4 +1,5 @@
 import sys
+sys.path.append('/home/vinicius/git-projects/phaino')
 
 
 from phaino.models.gaussian import Gaussian
