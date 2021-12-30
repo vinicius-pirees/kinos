@@ -1,13 +1,13 @@
 def assign_models_priority(user_constraints, models):
 
     filtered_models = []
-    if user_constraints['is_real_time']:
+    if user_constraints.get('is_real_time'):
         for model in models:
             if model['inference_rate'] >= 30:
                 filtered_models.append(model)
 
 
-    if user_constraints['minimum_efectiveness'] is not None:
+    if user_constraints.get('minimum_efectiveness') is not None:
         for model in models:
             if model['efectiveness'] >= user_constraints['minimum_efectiveness']:
                 filtered_models.append(model)

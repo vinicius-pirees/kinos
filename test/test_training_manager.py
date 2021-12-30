@@ -43,39 +43,12 @@ class TestTrainingManager(unittest.TestCase):
 
 
 
-        self.models_with_priority = [
-            {
-                "name": "model_1",
-                "priority": 0,
-                "training_rate": 200,
-                "efectiveness": 30,
-                "inference_rate": 10,
-                "model":  MockModel(15)
-            },
-            {
-                "name": "model_2",
-                "priority": 1,
-                "training_rate": 400,
-                "efectiveness": 20,
-                "inference_rate": 20,
-                "model":  MockModel(15)
-            },
-            {
-                "name": "model_3",
-                "priority": 2,
-                "training_rate": 300,
-                "efectiveness": 20,
-                "inference_rate": 20,
-                "model":  MockModel(15)
-            }
-            
-        ]
+        
 
 
-        self.models_with_priority_different_times = [
+        self.models_different_times = [
             {
                 "name": "model_1",
-                "priority": 0,
                 "training_rate": 200,
                 "efectiveness": 30,
                 "inference_rate": 10,
@@ -83,7 +56,6 @@ class TestTrainingManager(unittest.TestCase):
             },
             {
                 "name": "model_2",
-                "priority": 1,
                 "training_rate": 400,
                 "efectiveness": 20,
                 "inference_rate": 20,
@@ -91,7 +63,6 @@ class TestTrainingManager(unittest.TestCase):
             },
             {
                 "name": "model_3",
-                "priority": 2,
                 "training_rate": 300,
                 "efectiveness": 20,
                 "inference_rate": 20,
@@ -100,23 +71,51 @@ class TestTrainingManager(unittest.TestCase):
             
         ]
 
+
+
+        self.models_insufficient = [
+            {
+                "name": "model_1",
+                "training_rate": 200,
+                "efectiveness": 30,
+                "inference_rate": 10,
+                "model":  MockModel(90)
+            },
+            {
+                "name": "model_2",
+                "training_rate": 400,
+                "efectiveness": 20,
+                "inference_rate": 20,
+                "model":  MockModel(60, insufficient_computing_retries=1)
+            },
+            {
+                "name": "model_3",
+                "training_rate": 300,
+                "efectiveness": 20,
+                "inference_rate": 20,
+                "model":  MockModel(10)
+            }
+            
+        ]
+
         print("setUpClass")
 
     def test_priority(self):
-        models_with_priority = assign_models_priority(self.user_constraints, self.models)
-        self.assertEqual(len(models_with_priority), 3)
+        #TODO actually verify the priorities, test with constraints
+        training_manager = TrainingManager(self.models, self.user_constraints)
+        self.assertEqual(len(training_manager.models), 3)
 
     @skip
     def test_adapt(self):
-        training_manager = TrainingManager(self.models_with_priority)
+        training_manager = TrainingManager(self.models)
         with self.assertRaises(SystemExit) as cm:
             training_manager.adapt()
 
         self.assertEqual(cm.exception.code, 0)
 
-    #@skip
+    @skip
     def test_adapt_different_times(self):
-        training_manager = TrainingManager(self.models_with_priority_different_times)
+        training_manager = TrainingManager(self.models_different_times)
 
         with self.assertRaises(SystemExit) as cm:
             training_manager.adapt()
@@ -124,7 +123,13 @@ class TestTrainingManager(unittest.TestCase):
         self.assertEqual(cm.exception.code, 0)
 
 
-        
+    def test_adapt_different_times(self):
+        training_manager = TrainingManager(self.models_insufficient)
+
+        with self.assertRaises(SystemExit) as cm:
+            training_manager.adapt()
+
+        self.assertEqual(cm.exception.code, 0)    
       
 
     @classmethod
