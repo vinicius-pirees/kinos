@@ -1,5 +1,6 @@
 import time
 from tqdm import tqdm
+from multiprocessing import Value
 
 
 class InsufficientComputingCapacityException(Exception):
@@ -7,19 +8,18 @@ class InsufficientComputingCapacityException(Exception):
 
 class MockModel():
 
-    def __init__(self, epochs=60, epoch_time_seconds=1, insufficient_computing_retries=0):
+    def __init__(self, epochs=60, epoch_time_seconds=1, insufficient_computing=False):
         self.epochs = epochs
         self.epoch_time_seconds = epoch_time_seconds
-        self.insufficient_computing_retries = insufficient_computing_retries
-        self.insufficient_count = 0
+        self.insufficient_computing = insufficient_computing
+    
 
     def fit(self):
-        if self.insufficient_count >= self.insufficient_computing_retries:
+        if not self.insufficient_computing:
             for i in tqdm(range(self.epochs)):
                 time.sleep(self.epoch_time_seconds)
         else:
-            self.insufficient_count+=1
-            raise InsufficientComputingCapacityException()
+            raise InsufficientComputingCapacityException("Not enough cpu capacity")
             
 
     def predict(self):

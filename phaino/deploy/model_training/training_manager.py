@@ -1,6 +1,6 @@
 import sys
 import time
-from multiprocessing import Process, Queue, Array
+from multiprocessing import Process, Queue, Array, Manager
 from phaino.deploy.model_training.model_selection import assign_models_priority
 
 
@@ -17,43 +17,43 @@ class TrainingManager():
         self.process_map = {}
         self.message_queue = Queue()
         self.n_models = len(models)
-        self.insufficient_capacity_list = Array('i', [])
+        
 
 
-    def handle_training(self, model, priority, message_queue, training_data=None):
+    def handle_training(self, model, priority, message_queue, insufficient_capacity_list, training_data=None):
         print("priority", priority)
         try:
             model.fit()
         except Exception as e: #TODO Consider only exceptions related to lack of computing capacity
             print(e)
-            if priority not in self.insufficient_capacity_list:
+            if priority not in insufficient_capacity_list:
                 # Append to array
-                self.insufficient_capacity_list = Array('i', self.insufficient_capacity_list[:] + [priority])
-                print(self.insufficient_capacity_list[:])
+                insufficient_capacity_list.append(priority)
 
-                # Stop process and remove it from the process map, if map is filled
-                if  self.process_map.get(priority) is not None:
-                    self.process_map[priority].terminate()
-                    self.process_map.pop(priority)
-                return
+            # Stop process and remove it from the process map, if map is filled
+            if  self.process_map.get(priority) is not None:
+                self.process_map[priority].terminate()
+                self.process_map.pop(priority)
+            return
+
 
         message_queue.put(priority) # Notify
         self.current_model = model # Switch to model
 
-        if priority in self.insufficient_capacity_list[:]:
-                self.__remove_from_insufficient_list(priority) 
+        print(insufficient_capacity_list)
+        if priority in insufficient_capacity_list:
+                self.__remove_from_insufficient_list(priority, insufficient_capacity_list) 
 
-        self.__attempt_train_insufficient()
+        self.__attempt_train_insufficient(insufficient_capacity_list)
 
 
-    def __remove_from_insufficient_list(self, priority):
-        self.insufficient_capacity_list =  Array('i', [x for x in self.insufficient_capacity_list[:] if x != priority])
+    def __remove_from_insufficient_list(self, priority, insufficient_capacity_list):
+        insufficient_capacity_list.remove(priority)
 
-    def __attempt_train_insufficient(self):
-        priorities = self.insufficient_capacity_list[:]
+    def __attempt_train_insufficient(self, insufficient_capacity_list):
+        priorities = insufficient_capacity_list
         for priority in priorities:
-            print(priority)
-            self.handle_training(self.models_indexed_by_priority[priority]['model'], priority, self.message_queue)
+            self.handle_training(self.models_indexed_by_priority[priority]['model'], priority, self.message_queue, insufficient_capacity_list)
 
 
     def __stop_lower_priority(self, priority):
@@ -70,26 +70,29 @@ class TrainingManager():
     def adapt(self):
         priorities = list(range(0, self.n_models))
 
-        for priority in priorities:
-            model = self.models_indexed_by_priority[priority]
-            model_class = model['model']
-            p = Process(target=self.handle_training, args=(model_class, priority, self.message_queue,))
-            p.start()
-            self.process_map[priority] = p
-            time.sleep(0.05) # Avoid processes to be launched out of order
+        with Manager() as manager:
+            insufficient_capacity_list = manager.list()
 
-    
-        while True:
-            priority = self.message_queue.get()
-            time.sleep(1)
+            for priority in priorities:
+                model = self.models_indexed_by_priority[priority]
+                model_class = model['model']
+                p = Process(target=self.handle_training, args=(model_class, priority, self.message_queue,insufficient_capacity_list,))
+                p.start()
+                self.process_map[priority] = p
+                time.sleep(0.05) # Avoid processes to be launched out of order
 
-            print("Finished priority", priority)
+        
+            while True:
+                priority = self.message_queue.get()
+                time.sleep(1)
 
-            if priority == 0:
-                print("Finishing training since the model with highest priority is ready")
-                sys.exit(0)
-            else:
-                self.__stop_lower_priority(priority)
+                print("Finished priority", priority)
+
+                if priority == 0:
+                    print("Finishing training since the model with highest priority is ready")
+                    sys.exit(0)
+                else:
+                    self.__stop_lower_priority(priority)
 
 
     

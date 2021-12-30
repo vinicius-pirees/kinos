@@ -40,12 +40,6 @@ class TestTrainingManager(unittest.TestCase):
             }
         ]
 
-
-
-
-        
-
-
         self.models_different_times = [
             {
                 "name": "model_1",
@@ -79,21 +73,21 @@ class TestTrainingManager(unittest.TestCase):
                 "training_rate": 200,
                 "efectiveness": 30,
                 "inference_rate": 10,
-                "model":  MockModel(90)
+                "model":  MockModel(12)
             },
             {
                 "name": "model_2",
                 "training_rate": 400,
                 "efectiveness": 20,
                 "inference_rate": 20,
-                "model":  MockModel(60, insufficient_computing_retries=1)
+                "model":  MockModel(6, insufficient_computing=True)
             },
             {
                 "name": "model_3",
                 "training_rate": 300,
                 "efectiveness": 20,
                 "inference_rate": 20,
-                "model":  MockModel(10)
+                "model":  MockModel(4)
             }
             
         ]
@@ -123,7 +117,8 @@ class TestTrainingManager(unittest.TestCase):
         self.assertEqual(cm.exception.code, 0)
 
 
-    def test_adapt_different_times(self):
+    def test_adapt_insufficient(self):
+        ## TODO (not prioritary) Simulate scenario where there is no capacity and then it is released (maybe use a file to control the state)
         training_manager = TrainingManager(self.models_insufficient)
 
         with self.assertRaises(SystemExit) as cm:
