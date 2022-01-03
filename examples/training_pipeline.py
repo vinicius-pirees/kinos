@@ -38,4 +38,12 @@ print('done')
 
 gaussian = Gaussian()
 lstm_autoencoder = LSTMAutoEncoder()
+
+
+
+project_name = 'experiment_1'
+
+
+
+
 models_list = [lstm_autoencoder, gaussian]
