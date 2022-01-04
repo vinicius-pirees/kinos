@@ -1,6 +1,12 @@
 import cv2
 import numpy as np
 import scipy.signal as sig
+from tqdm import tqdm
+
+from phaino.utils.commons import frame_to_gray, reduce_frame
+from phaino.utils.commons import frame_to_bytes_str, frame_from_bytes_str
+
+
 
 def blockshaped(arr, nrows, ncols):
     """
@@ -98,19 +104,65 @@ def generate_features(frame_sequence,cube_depth,tile_size):
         
     return np.concatenate(features, axis=0)
 
-def process_frames(frames,cube_depth=5,tile_size=10):
-    num_frames = len(frames)
-    total_sequences = int(num_frames/cube_depth)
+# # Old version
+# def process_frames(frames,cube_depth=5,tile_size=10):
+#     num_frames = len(frames)
+#     total_sequences = int(num_frames/cube_depth)
     
-    sequence_features = []
+#     sequence_features = []
     
     
-    for i in range(0,total_sequences):
-        frames_slice = frames[i*cube_depth:i*cube_depth + cube_depth]
+#     for i in range(0,total_sequences):
+#         frames_slice = frames[i*cube_depth:i*cube_depth + cube_depth]
     
-        sequence_features.append(generate_features(frames_slice,cube_depth,tile_size))
+#         sequence_features.append(generate_features(frames_slice,cube_depth,tile_size))
     
-    result = np.array(sequence_features) #shape (total_sequences, cubes, gradients) Lu et al applies PCA to reduce the gradients dimension
-    return result.reshape(result.shape[0], result.shape[1]*result.shape[2]) #shape (total_sequences, features)
+#     result = np.array(sequence_features) #shape (total_sequences, cubes, gradients) Lu et al applies PCA to reduce the gradients dimension
+#     return result.reshape(result.shape[0], result.shape[1]*result.shape[2]) #shape (total_sequences, features)
 
 
+def generate_features_frames(frames, cube_depth=5, tile_size=10):
+    counter = 0
+    frame_sequence = []
+    original_frame_sequence = []
+    results = []
+
+    for frame in tqdm(frames):
+        original_frame_sequence.append(frame)
+        if counter%cube_depth == 0 and counter!=0:
+            # To grayscale
+            frame = frame_to_gray(frame)
+            # Divide pixels by 255
+            reduced_frame = reduce_frame(frame)
+            frame_sequence.append(reduced_frame)
+
+
+            features = generate_features(frame_sequence, cube_depth, tile_size)
+            result = features.reshape(1, features.shape[0]*features.shape[1])
+            results.append(result)
+
+
+            ##Keep original frames
+            #jpeg encode
+            # jpeg_frames = np.array([cv2.imencode('.jpg', x)[1] for x in original_frame_sequence])
+            # origin_frames = frame_to_bytes_str(jpeg_frames)
+
+
+
+            # Reset frame sequences
+            original_frame_sequence = []
+            frame_sequence = []
+            counter+=1
+        else:
+            if counter == 0:
+                counter+=1
+                continue
+
+            # To grayscale
+            frame = frame_to_gray(frame)
+            # Divide pixels by 255
+            reduced_frame = reduce_frame(frame)
+            frame_sequence.append(reduced_frame)
+            counter+=1
+            
+    return results

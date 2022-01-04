@@ -10,7 +10,8 @@ from phaino.config.config import PhainoConfiguration
 
 config = PhainoConfiguration().get_config()
 profile = config['general']['profile']
-models_directory = config[profile]['directory']
+MODELS_DIRECTORY = config[profile]['directory']
+PROJECT_NAME = config['general']['project_name']
 
 
 def frame_to_gray(frame):
@@ -75,12 +76,14 @@ def init_model_dir(model_dir):
     os.makedirs(model_dir, exist_ok=True) 
 
 
-def resolve_model_path(project_name, model_type, model_name):
-    return os.path.join(models_directory, project_name, model_type, model_name, datetime.now().strftime("%Y%m%d_%H%M%S")) 
+def resolve_model_path(model_name):
+    path = os.path.join(MODELS_DIRECTORY, PROJECT_NAME, model_name, datetime.now().strftime("%Y%m%d_%H%M%S")) 
+    init_model_dir(path)
+    return path
 
 
-def get_list_of_models_in_path(project_name, model_type, model_name):
-    models_path = os.path.join(models_directory, project_name, model_type, model_name)
+def get_list_of_models_in_path(model_name):
+    models_path = os.path.join(MODELS_DIRECTORY, PROJECT_NAME, model_name)
     model_list = os.listdir(models_path) 
     if len(model_list) == 0:
         print('No model yet')
@@ -89,17 +92,17 @@ def get_list_of_models_in_path(project_name, model_type, model_name):
         model_list.sort()
         return model_list
 
-def get_last_model_path(project_name, model_type, model_name):
-        models_path = os.path.join(models_directory, project_name, model_type, model_name)
-        model_list = get_list_of_models_in_path(project_name, model_type, model_name)
+def get_last_model_path(model_name):
+        models_path = os.path.join(MODELS_DIRECTORY, PROJECT_NAME, model_name)
+        model_list = get_list_of_models_in_path(model_name)
         if model_list is not None:
             last_model = model_list[-1]
             return os.path.join(models_path, last_model)
 
 
-def get_first_model_path(project_name, model_type, model_name):
-        models_path = os.path.join(models_directory, project_name, model_type, model_name)
-        model_list = get_list_of_models_in_path(project_name, model_type, model_name)
+def get_first_model_path(model_name):
+        models_path = os.path.join(MODELS_DIRECTORY, PROJECT_NAME, model_name)
+        model_list = get_list_of_models_in_path(model_name)
         if model_list is not None:
             last_model = model_list[0]
             return os.path.join(models_path, last_model)

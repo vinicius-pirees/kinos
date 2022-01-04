@@ -17,33 +17,33 @@ video_files = os.listdir(dataset_location)
 train_video_files = [x for x in video_files if x[0:5] == 'train']
 train_video_files.sort()
 
-# for video in train_video_files:
-#     video_producer = VideoProducer("localhost:29092", "training", os.path.join(dataset_location, video), debug=True, resize_to_dimension=(256,256))
-#     video_producer.send_video(extra_fields={"sequence_name": video})
+for video in train_video_files:
+    video_producer = VideoProducer("localhost:29092", "training", os.path.join(dataset_location, video), debug=True, resize_to_dimension=(256,256))
+    video_producer.send_video(extra_fields={"sequence_name": video})
 
 
 
 
-# consumer = ImageFiniteConsumer("localhost:29092", "training")
-# videos = {}
-# for msg in consumer.consumer:
-#     sequence_name = msg.value['sequence_name']
-#     if videos.get(sequence_name) is None:
-#         videos[sequence_name] = []
+consumer = ImageFiniteConsumer("localhost:29092", "training")
+videos = {}
+for msg in consumer.consumer:
+    sequence_name = msg.value['sequence_name']
+    if videos.get(sequence_name) is None:
+        videos[sequence_name] = []
     
-#     videos[sequence_name].append(frame_from_bytes_str(msg.value['data']))
+    videos[sequence_name].append(frame_from_bytes_str(msg.value['data']))
 
 
 print('done')
 
-gaussian = Gaussian()
-lstm_autoencoder = LSTMAutoEncoder()
+# gaussian = Gaussian()
+# lstm_autoencoder = LSTMAutoEncoder()
 
 
 
-project_name = 'experiment_1'
+# project_name = 'experiment_1'
 
 
 
 
-models_list = [lstm_autoencoder, gaussian]
+# models_list = [lstm_autoencoder, gaussian]
