@@ -139,7 +139,7 @@ class Gaussian:
                 logger.info('Generating spatio-temporal features')
                 temp_training_set = generate_features_frames(training_set, cube_depth=self.spatio_temporal_depth, tile_size=self.spatio_temporal_sequence_size)
             else:
-                 temp_training_set = training_set
+                temp_training_set = training_set
 
         final_training_set = np.array(temp_training_set)
         final_training_set = final_training_set.reshape(final_training_set.shape[0], final_training_set.shape[2])

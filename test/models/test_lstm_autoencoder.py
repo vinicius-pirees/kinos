@@ -1,10 +1,10 @@
 import unittest
-from phaino.models.gaussian import Gaussian
+from phaino.models.lstm_autoencoder import LSTMAutoEncoder
 from sklearn.datasets import load_sample_images
 
 
 
-class TestGaussian(unittest.TestCase):
+class TestLSTMAutoEncoder(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
@@ -15,10 +15,10 @@ class TestGaussian(unittest.TestCase):
         self.sequences = [sequence_1,sequence_2]
 
 
-    def test_gaussian_with_pca(self):
-        gaussian = Gaussian(model_name='gaussian_1', pca=True, pca_n_components=6)
-        gaussian.fit(self.sequences)
-        gaussian.save_model()
+    def test_lstm(self):
+        lstm = LSTMAutoEncoder(model_name='lstm_1', epochs=1)
+        lstm.fit(self.sequences)
+        lstm.save_model()
 
 
     @classmethod
