@@ -23,7 +23,7 @@ class Gaussian:
                     pca_n_components=150,
                     spatio_temporal_features=True,
                     spatio_temporal_depth=5,
-                    spatio_temporal_sequence_size=10
+                    spatio_temporal_sequence_size=10                  
                 ):
         self.means = None
         self.variances = None
@@ -38,6 +38,7 @@ class Gaussian:
         self.spatio_temporal_depth = spatio_temporal_depth
         self.spatio_temporal_sequence_size = spatio_temporal_sequence_size
         self.pca_set = None
+        self.training_data_name=None
 
 
     def measures(self, X):
@@ -122,8 +123,10 @@ class Gaussian:
         self.variances = model['variances']
         self.stds = model['stds']
     
-    def fit(self, training_set):
+    def fit(self, training_set, training_data_name=None):
         temp_training_set = []
+        if training_data_name is not None:
+            self.training_data_name = training_data_name
 
         if any(isinstance(el, list) for el in training_set): # if training set is a sequence of frames
             if self.spatio_temporal_features:
@@ -170,7 +173,8 @@ class Gaussian:
             "pca_n_components": self.pca_n_components,
             "spatio_temporal_features": self.spatio_temporal_features,
             "spatio_temporal_depth": self.spatio_temporal_depth,
-            "spatio_temporal_sequence_size": self.spatio_temporal_sequence_size
+            "spatio_temporal_sequence_size": self.spatio_temporal_sequence_size,
+            "training_data_name": self.training_data_name
         }
 
         with open(os.path.join(path, "metadata.json"), "w") as outfile:

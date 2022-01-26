@@ -37,6 +37,8 @@ class LSTMAutoEncoder:
             self.model_name = 'lstm_autoencoder'
         else:
             self.model_name = model_name
+
+        self.training_data_name=None
         
         
     def lstm_autoencoder_frame(self, frame, input_size):
@@ -120,9 +122,11 @@ class LSTMAutoEncoder:
         return load_model(model_path, custom_objects={'LayerNormalization': LayerNormalization})
 
 
-    def fit(self, training_set):
+    def fit(self, training_set, training_data_name=None):
 
         temp_training_set = []
+        if training_data_name is not None:
+            self.training_data_name = training_data_name
 
         if any(isinstance(el, list) for el in training_set): # if training set is a sequence of frames
             for sequence in training_set:
@@ -172,7 +176,8 @@ class LSTMAutoEncoder:
         metadata = {
             "batch_size": self.batch_size, 
             "epochs": self.epochs,
-            "sequence_size": self.sequence_size
+            "sequence_size": self.sequence_size,
+            "training_data_name": self.training_data_name
            
         }
 

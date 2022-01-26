@@ -7,7 +7,10 @@ import cv2
 import numpy as np
 from io import BytesIO
 import json
+from phaino.config.config import PhainoConfiguration
 
+config = PhainoConfiguration().get_config()
+project_name  = config['general']['project_name']
 
 
 from phaino.utils.commons import frame_to_bytes_str, frame_from_bytes_str
@@ -29,6 +32,7 @@ class GenericConsumer:
         self.consumer = KafkaConsumer(topic,
                                       bootstrap_servers=bootstrap_servers,
                                       auto_offset_reset='earliest',
+                                      group_id=project_name,
                                       consumer_timeout_ms=consumer_timeout_ms,
                                       enable_auto_commit=True,
                                       value_deserializer=lambda x: json.loads(x.decode('utf-8')))
@@ -54,6 +58,7 @@ class ImageConsumer:
         self.consumer = KafkaConsumer(topic,
                                       bootstrap_servers=bootstrap_servers,
                                       auto_offset_reset='earliest',
+                                      group_id=project_name,
                                       consumer_timeout_ms=consumer_timeout_ms,
                                       enable_auto_commit=True,
                                       value_deserializer=lambda x: json.loads(x.decode('utf-8')))
@@ -75,9 +80,10 @@ class ImageFiniteConsumer:
         self.topic = topic
         self.consumer = KafkaConsumer(topic,
                                       bootstrap_servers=bootstrap_servers,
-                                      consumer_timeout_ms=1000,
+                                      consumer_timeout_ms=5000,
                                       auto_offset_reset='earliest',
                                       enable_auto_commit=True,
+                                      group_id=project_name,
                                       value_deserializer=lambda x: json.loads(x.decode('utf-8')))
         
         
