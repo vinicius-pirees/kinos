@@ -3,7 +3,7 @@ import os
 import time
 
 from phaino.streams.producers import VideoProducer
-from phaino.deploy.model_training.data_acquisition import DataAcquisition
+from phaino.data_acquisition.training import TrainingDataAcquisition
 
 
 
@@ -32,7 +32,7 @@ class TestDriftDetection(unittest.TestCase):
 
         time.sleep(5)    
 
-        data_acquirer = DataAcquisition(topic='training')
+        data_acquirer = TrainingDataAcquisition(topic='training')
         data_acquirer.load()
 
         self.assertEqual(len(data_acquirer.data), 1)

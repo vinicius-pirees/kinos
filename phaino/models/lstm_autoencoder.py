@@ -190,7 +190,9 @@ class LSTMAutoEncoder:
     
     
     def predict(self, frame_sequence):
-        frame_sequence = np.reshape(frame_sequence, (1,) + frame_sequence.shape)
+        transformed_frames = self.input_frames_transform(np.array(frame_sequence))
+        transformed_frames = self.get_training_set(transformed_frames)
+        frame_sequence = np.reshape(transformed_frames, (1,) + transformed_frames.shape)
 
         reconstructed_sequence = self.model.predict(frame_sequence,batch_size=self.batch_size)
         reconstruction_cost = np.linalg.norm(np.subtract(frame_sequence,reconstructed_sequence))

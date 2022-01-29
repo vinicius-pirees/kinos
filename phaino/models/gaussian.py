@@ -57,6 +57,8 @@ class Gaussian:
     
     
     def predict(self, x):
+        x = generate_features_frames([x], cube_depth=self.spatio_temporal_depth, tile_size=self.spatio_temporal_sequence_size)
+        x = x[0]
         calc_gaussian = lambda x, mu, sigma: (1.0 / (sigma * np.sqrt(2 * np.pi))) * np.exp( -(x - mu)**2 / (2 * sigma**2) )
 
         gaussian  = calc_gaussian(x, self.means, self.stds)

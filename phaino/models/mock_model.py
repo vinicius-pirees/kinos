@@ -14,7 +14,7 @@ class MockModel():
         self.insufficient_computing = insufficient_computing
     
 
-    def fit(self):
+    def fit(self, training_data=None, training_data_name=None):
         if not self.insufficient_computing:
             for i in tqdm(range(self.epochs)):
                 time.sleep(self.epoch_time_seconds)
@@ -22,5 +22,5 @@ class MockModel():
             raise InsufficientComputingCapacityException("Not enough cpu capacity")
             
 
-    def predict(self):
-        pass
+    def predict(self, examples):
+        return 1

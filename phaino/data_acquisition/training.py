@@ -1,7 +1,5 @@
 import os
-
 import pickle
-from phaino.streams.producers import VideoProducer
 from phaino.streams.consumers import ImageFiniteConsumer
 from phaino.utils.commons import frame_from_bytes_str
 from phaino.config.config import PhainoConfiguration
@@ -12,7 +10,7 @@ profile = config['general']['profile']
 project_name  = config['general']['project_name']
 
 
-class DataAcquisition():
+class TrainingDataAcquisition():
     """
     If input_data is defined, then the topic data is ignored
 

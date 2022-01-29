@@ -20,10 +20,10 @@ class TrainingManager():
         
 
 
-    def handle_training(self, model, priority, message_queue, insufficient_capacity_list, training_data=None):
+    def handle_training(self, model, priority, message_queue, insufficient_capacity_list, training_data=None, training_data_name=None):
         print("priority", priority)
         try:
-            model.fit()
+            model.fit(training_data, training_data_name)
         except Exception as e: #TODO Consider only exceptions related to lack of computing capacity
             print(e)
             if priority not in insufficient_capacity_list:
@@ -67,7 +67,7 @@ class TrainingManager():
                         print(f'Stopping process {process.name}, model_info: {model_info}')
                         process.terminate()
 
-    def adapt(self):
+    def adapt(self, training_data=None, training_data_name=None):
         priorities = list(range(0, self.n_models))
 
         with Manager() as manager:
@@ -76,7 +76,7 @@ class TrainingManager():
             for priority in priorities:
                 model = self.models_indexed_by_priority[priority]
                 model_class = model['model']
-                p = Process(target=self.handle_training, args=(model_class, priority, self.message_queue,insufficient_capacity_list,))
+                p = Process(target=self.handle_training, args=(model_class, priority, self.message_queue,insufficient_capacity_list,training_data, training_data_name))
                 p.start()
                 self.process_map[priority] = p
                 time.sleep(0.05) # Avoid processes to be launched out of order
@@ -90,7 +90,8 @@ class TrainingManager():
 
                 if priority == 0:
                     print("Finishing training since the model with highest priority is ready")
-                    sys.exit(0)
+                    #sys.exit(0)
+                    return 0
                 else:
                     self.__stop_lower_priority(priority)
 

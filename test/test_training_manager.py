@@ -102,29 +102,34 @@ class TestTrainingManager(unittest.TestCase):
     @skip
     def test_adapt(self):
         training_manager = TrainingManager(self.models)
-        with self.assertRaises(SystemExit) as cm:
-            training_manager.adapt()
+        # with self.assertRaises(SystemExit) as cm:
+        #     training_manager.adapt()
 
-        self.assertEqual(cm.exception.code, 0)
+        # self.assertEqual(cm.exception.code, 0)
+        self.assertEqual(training_manager.adapt(), 0) 
 
     @skip
     def test_adapt_different_times(self):
         training_manager = TrainingManager(self.models_different_times)
 
-        with self.assertRaises(SystemExit) as cm:
-            training_manager.adapt()
+        # with self.assertRaises(SystemExit) as cm:
+        #     training_manager.adapt()
 
-        self.assertEqual(cm.exception.code, 0)
+        # self.assertEqual(cm.exception.code, 0)
+
+        self.assertEqual(training_manager.adapt(), 0) 
 
 
     def test_adapt_insufficient(self):
         ## TODO (not prioritary) Simulate scenario where there is no capacity and then it is released (maybe use a file to control the state)
         training_manager = TrainingManager(self.models_insufficient)
 
-        with self.assertRaises(SystemExit) as cm:
-            training_manager.adapt()
+        # with self.assertRaises(SystemExit) as cm:
+        #     training_manager.adapt()
 
-        self.assertEqual(cm.exception.code, 0)    
+        # self.assertEqual(cm.exception.code, 0)   
+
+        self.assertEqual(training_manager.adapt(), 0) 
       
 
     @classmethod
