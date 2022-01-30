@@ -38,7 +38,7 @@ class DriftDetector():
             examples = self.dimensionality_reduction.predict(examples)
         
         for index, example in enumerate(examples):
-            print(example)
+            #print(example)
             in_drift, in_warning = self.drift_algorithm.update(example)
             if in_drift:
                 return True, index

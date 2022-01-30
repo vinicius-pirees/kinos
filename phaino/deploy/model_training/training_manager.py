@@ -6,9 +6,10 @@ from phaino.deploy.model_training.model_selection import assign_models_priority
 
 
 class TrainingManager():
-    def __init__(self, models, user_constraints={}):
+    def __init__(self, models, user_constraints={}, model_queue=None):
         self.models = assign_models_priority(user_constraints, models)
         self.current_model = None
+        self.model_queue = model_queue
 
         self.models_indexed_by_priority = {}
         for model in models:
@@ -17,8 +18,11 @@ class TrainingManager():
         self.process_map = {}
         self.message_queue = Queue()
         self.n_models = len(models)
-        
 
+
+    def get_current_model(self):
+        return self.current_model
+        
 
     def handle_training(self, model, priority, message_queue, insufficient_capacity_list, training_data=None, training_data_name=None):
         print("priority", priority)
@@ -38,6 +42,11 @@ class TrainingManager():
 
 
         message_queue.put(priority) # Notify
+        
+        if self.model_queue is not None:
+            print("Getting here with model priority", priority)
+            self.model_queue.put(model)
+
         self.current_model = model # Switch to model
 
         print(insufficient_capacity_list)

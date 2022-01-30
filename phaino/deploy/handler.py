@@ -1,6 +1,7 @@
 import time
 import sys
-from multiprocessing import Process
+from multiprocessing import Process, Manager, Queue
+from multiprocessing.managers import BaseManager
 from phaino.deploy.model_training.training_manager import TrainingManager
 from phaino.drift.detector import DriftDetector
 from phaino.data_acquisition.training import TrainingDataAcquisition
@@ -28,6 +29,7 @@ class Handler():
         self.inference_data_acquisition = InferenceDataAcquisition(topic=inference_data_topic)
         self.drift_detector = DriftDetector(dimensionality_reduction=dimensionality_reduction,
                                             drift_algorithm=drift_algorithm)
+        self.model_queue = Queue()
                                             
         self.reset(initial_training_data)
 
@@ -35,8 +37,16 @@ class Handler():
 
         
 
-    def reset(self, training_data):
-        self.training_manager = TrainingManager(self.models, self.user_constraints)
+    def reset(self, training_data=None):
+
+
+
+        self.training_manager = TrainingManager(self.models, self.user_constraints, self.model_queue)
+
+        # BaseManager.register('TrainingManager', TrainingManager)
+        # manager = BaseManager()
+        # manager.start()
+        # self.training_manager = manager.TrainingManager(self.models, self.user_constraints)
 
         if self.training_data_topic is not None:
             self.training_data_acquirer = TrainingDataAcquisition(topic=self.training_data_topic)
@@ -46,8 +56,12 @@ class Handler():
             self.training_data_acquirer.load(input_data=training_data)
 
         training_sequence = []
-        for sequence in self.training_data_acquirer.data.values():
-            training_sequence += sequence
+        if isinstance(self.training_data_acquirer.data, dict):
+            for sequence in self.training_data_acquirer.data.values():
+                training_sequence += sequence
+        else:
+            training_sequence = self.training_data_acquirer.data
+       
         self.drift_detector.update_base_data(training_sequence)
 
 
@@ -64,14 +78,32 @@ class Handler():
 
         ## TODO: Issue self.training_manager.current_model is alwasy null. Probabily due to threading issues
         while True:
-            if self.training_manager.current_model is None:
-                time.sleep(10)
-                print("No model is available yet!")
+
+            print("Waiting for an available model")
+            model = self.model_queue.get()
+            print("Model ready")
+
+            # if self.training_manager.get_current_model() is None:
+            #     time.sleep(10)
+            #     print("No model is available yet!")
+            #     continue
 
             for msg in self.inference_data_acquisition.consumer.consumer:
+
+                # new_model = self.model_queue.get_nowait()
+                # if new_model is not None:
+                #     model = new_model
+                #     print("Switching model")
+
+                if not self.model_queue.empty:
+                     model = self.model_queue.get()
+                     print("Switching model")
+
+
                 data = frame_from_bytes_str(msg.value['data'])
                 # TODO send to prediction topic?
-                prediciton = self.training_manager.current_model.predict(data)
+                #prediciton = self.training_manager.get_current_model().predict(data)
+                prediciton = model.predict(data)
 
                 in_drift, drift_index = self.drift_detector.drift_check([data])
                 if in_drift:
