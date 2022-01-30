@@ -67,50 +67,81 @@ class Handler():
 
 
     def start(self):
-        # Needs to run detached
-        # self.training_manager.adapt(training_data=self.training_data_acquirer.data, 
-        #                             training_data_name=self.training_data_acquirer.train_name)
 
-        p = Process(target=self.training_manager.adapt, args=(self.training_data_acquirer.data, 
-                                                                self.training_data_acquirer.train_name))
-        p.start()
-       
-
-        ## TODO: Issue self.training_manager.current_model is alwasy null. Probabily due to threading issues
-        while True:
-
-            print("Waiting for an available model")
-            model = self.model_queue.get()
-            print("Model ready")
-
-            # if self.training_manager.get_current_model() is None:
-            #     time.sleep(10)
-            #     print("No model is available yet!")
-            #     continue
-
-            for msg in self.inference_data_acquisition.consumer.consumer:
-
-                # new_model = self.model_queue.get_nowait()
-                # if new_model is not None:
-                #     model = new_model
-                #     print("Switching model")
-
-                if not self.model_queue.empty:
-                     model = self.model_queue.get()
-                     print("Switching model")
+        with Manager() as manager:
+            model_list = manager.list()
 
 
-                data = frame_from_bytes_str(msg.value['data'])
-                # TODO send to prediction topic?
-                #prediciton = self.training_manager.get_current_model().predict(data)
-                prediciton = model.predict(data)
+            # Needs to run detached
+            # self.training_manager.adapt(training_data=self.training_data_acquirer.data, 
+            #                             training_data_name=self.training_data_acquirer.train_name)
 
-                in_drift, drift_index = self.drift_detector.drift_check([data])
-                if in_drift:
-                    print("Drift detected")
-                    #inject new data at training topic
-                    self.reset()
-                    sys.exit(0)
+            p = Process(target=self.training_manager.adapt, args=(self.training_data_acquirer.data, 
+                                                                    self.training_data_acquirer.train_name,
+                                                                    model_list))
+            p.start()
+        
+
+            ## TODO: Issue self.training_manager.current_model is alwasy null. Probabily due to threading issues
+            while True:
+
+                print("Waiting for an available model")
+
+
+                # model = self.model_queue.get()
+                # print("Model ready")
+
+                # if self.training_manager.get_current_model() is None:
+                #     time.sleep(10)
+                #     print("No model is available yet!")
+                #     continue
+
+
+                try:
+                    model = model_list[-1]
+                    model_list.pop()
+                    #model_list = manager.list()
+                except Exception as e:
+                    print("No model is available yet!")
+                    time.sleep(10)
+                    print(e)
+                    continue
+
+                
+
+                for msg in self.inference_data_acquisition.consumer.consumer:
+
+                    # new_model = self.model_queue.get_nowait()
+                    # if new_model is not None:
+                    #     model = new_model
+                    #     print("Switching model")
+
+                    # if not self.model_queue.empty:
+                    #     model = self.model_queue.get()
+                    #     print("Switching model")
+
+
+
+                    try:
+                        model = model_list[-1]
+                        model_list.pop()
+                        print("Switching model")
+                    except:
+                        pass
+
+
+
+                    data = frame_from_bytes_str(msg.value['data'])
+                    # TODO send to prediction topic?
+                    #prediciton = self.training_manager.get_current_model().predict(data)
+                    prediciton = model.predict(data)
+
+                    in_drift, drift_index = self.drift_detector.drift_check([data])
+                    if in_drift:
+                        print("Drift detected")
+                        #inject new data at training topic
+                        self.reset()
+                        sys.exit(0)
 
 
 

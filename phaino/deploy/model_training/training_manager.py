@@ -24,7 +24,7 @@ class TrainingManager():
         return self.current_model
         
 
-    def handle_training(self, model, priority, message_queue, insufficient_capacity_list, training_data=None, training_data_name=None):
+    def handle_training(self, model, priority, message_queue, insufficient_capacity_list, training_data=None, training_data_name=None, model_list=None):
         print("priority", priority)
         try:
             model.fit(training_data, training_data_name)
@@ -44,8 +44,12 @@ class TrainingManager():
         message_queue.put(priority) # Notify
         
         if self.model_queue is not None:
-            print("Getting here with model priority", priority)
+            #print("Getting here with model priority", priority)
             self.model_queue.put(model)
+
+        if model_list is not None:
+            print("Getting here with model priority", priority)
+            model_list.append(model)
 
         self.current_model = model # Switch to model
 
@@ -76,7 +80,7 @@ class TrainingManager():
                         print(f'Stopping process {process.name}, model_info: {model_info}')
                         process.terminate()
 
-    def adapt(self, training_data=None, training_data_name=None):
+    def adapt(self, training_data=None, training_data_name=None, model_list=None):
         priorities = list(range(0, self.n_models))
 
         with Manager() as manager:
@@ -85,7 +89,7 @@ class TrainingManager():
             for priority in priorities:
                 model = self.models_indexed_by_priority[priority]
                 model_class = model['model']
-                p = Process(target=self.handle_training, args=(model_class, priority, self.message_queue,insufficient_capacity_list,training_data, training_data_name))
+                p = Process(target=self.handle_training, args=(model_class, priority, self.message_queue,insufficient_capacity_list,training_data, training_data_name, model_list))
                 p.start()
                 self.process_map[priority] = p
                 time.sleep(0.05) # Avoid processes to be launched out of order
