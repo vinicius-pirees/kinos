@@ -1,11 +1,13 @@
 import time
 import sys
+from tqdm import tqdm
 from multiprocessing import Process, Manager, Queue
 from multiprocessing.managers import BaseManager
 from phaino.deploy.model_training.training_manager import TrainingManager
 from phaino.drift.detector import DriftDetector
 from phaino.data_acquisition.training import TrainingDataAcquisition
 from phaino.data_acquisition.inference import InferenceDataAcquisition
+from phaino.streams.producers import ImageProducer
 from phaino.utils.commons import frame_from_bytes_str
 
 
@@ -19,8 +21,10 @@ class Handler():
             drift_algorithm=None,
             dimensionality_reduction=None,
             training_data_topic=None,
+            is_initial_training_from_topic=True,
             initial_training_data=None,
-            inference_data_topic=None
+            inference_data_topic=None,
+            frame_dimension=(256,256)
             ):
         self.models= models
         self.user_constraints = user_constraints
@@ -30,14 +34,26 @@ class Handler():
         self.drift_detector = DriftDetector(dimensionality_reduction=dimensionality_reduction,
                                             drift_algorithm=drift_algorithm)
         self.model_queue = Queue()
+
+
+        if is_initial_training_from_topic:
+            self.training_data_acquirer = TrainingDataAcquisition(topic=self.training_data_topic)
+            self.training_data_acquirer.load()
+        else:
+            self.training_data_acquirer = TrainingDataAcquisition()
+            self.training_data_acquirer.load(input_data=initial_training_data)
+
+
+        self.training_after_drift_producer = ImageProducer("localhost:29092", self.training_data_topic, resize_to_dimension=frame_dimension)
+
                                             
-        self.reset(initial_training_data)
+        self.reset()
 
 
 
         
 
-    def reset(self, training_data=None):
+    def reset(self):
 
 
 
@@ -48,12 +64,7 @@ class Handler():
         # manager.start()
         # self.training_manager = manager.TrainingManager(self.models, self.user_constraints)
 
-        if self.training_data_topic is not None:
-            self.training_data_acquirer = TrainingDataAcquisition(topic=self.training_data_topic)
-            self.training_data_acquirer.load()
-        else:
-            self.training_data_acquirer = TrainingDataAcquisition()
-            self.training_data_acquirer.load(input_data=training_data)
+        
 
         training_sequence = []
         if isinstance(self.training_data_acquirer.data, dict):
@@ -71,23 +82,14 @@ class Handler():
         with Manager() as manager:
             model_list = manager.list()
 
-
-            # Needs to run detached
-            # self.training_manager.adapt(training_data=self.training_data_acquirer.data, 
-            #                             training_data_name=self.training_data_acquirer.train_name)
-
             p = Process(target=self.training_manager.adapt, args=(self.training_data_acquirer.data, 
                                                                     self.training_data_acquirer.train_name,
                                                                     model_list))
             p.start()
-        
 
-            ## TODO: Issue self.training_manager.current_model is alwasy null. Probabily due to threading issues
+            print("Waiting for an available model")
+
             while True:
-
-                print("Waiting for an available model")
-
-
                 # model = self.model_queue.get()
                 # print("Model ready")
 
@@ -96,15 +98,14 @@ class Handler():
                 #     print("No model is available yet!")
                 #     continue
 
-
                 try:
                     model = model_list[-1]
                     model_list.pop()
                     #model_list = manager.list()
-                except Exception as e:
-                    print("No model is available yet!")
-                    time.sleep(10)
-                    print(e)
+                except IndexError as e:
+                    sleep_seconds = 5
+                    print(f"No model is available yet, checking again in {sleep_seconds} seconds")
+                    time.sleep(sleep_seconds)
                     continue
 
                 
@@ -120,36 +121,42 @@ class Handler():
                     #     model = self.model_queue.get()
                     #     print("Switching model")
 
-
-
                     try:
                         model = model_list[-1]
                         model_list.pop()
                         print("Switching model")
-                    except:
+                    except IndexError as e:
                         pass
 
 
 
                     data = frame_from_bytes_str(msg.value['data'])
                     # TODO send to prediction topic?
-                    #prediciton = self.training_manager.get_current_model().predict(data)
                     prediciton = model.predict(data)
+                    time.sleep(1)
 
                     in_drift, drift_index = self.drift_detector.drift_check([data])
                     if in_drift:
                         print("Drift detected")
+
+
                         #inject new data at training topic
+                        print("Acquiring new training data")
+                        training_frames_counter = 0
+                        with tqdm(total=self.number_training_frames_after_drift) as pbar:
+                            for msg in self.inference_data_acquisition.consumer.consumer:
+                                if training_frames_counter >= self.number_training_frames_after_drift:
+                                    break
+                                #self.training_after_drift_producer.send_frame(frame_from_bytes_str(msg.value['data']))   
+                                self.training_after_drift_producer.producer.send(self.training_after_drift_producer.topic ,msg.value)     
+                                training_frames_counter+=1
+                                pbar.update(1)
+
+
+                        #Load the new training data
+                        self.training_data_acquirer = TrainingDataAcquisition(topic=self.training_data_topic)
+                        self.training_data_acquirer.load()
+                        print("New training data loaded")
+
                         self.reset()
                         sys.exit(0)
-
-
-
-
-
-
-        
-
-        
-
-

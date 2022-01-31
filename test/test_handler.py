@@ -15,8 +15,9 @@ class TestHandler(unittest.TestCase):
     @classmethod
     def setUpClass(self):
 
+        self.is_initial_training_from_topic = False    
 
-        self.inference_data_topic = 'inference_3'
+        self.inference_data_topic = 'inference_5'
 
 
         # Mock training data
@@ -32,7 +33,7 @@ class TestHandler(unittest.TestCase):
 
         
         # # Send training data
-        # self.training_data_topic = 'training'
+        self.training_data_topic = 'training_2'
 
         # home_dir = '/home/viniciusgoncalves'
         # dataset_location = os.path.join(home_dir,'toy_dataset/adoc/')
@@ -58,26 +59,26 @@ class TestHandler(unittest.TestCase):
                 "training_rate": 200,
                 "efectiveness": 30,
                 "inference_rate": 10,
-                "model":  MockModel(60)
+                "model":  MockModel(40)
             },
             {
                 "name": "model_2",
                 "training_rate": 300,
                 "efectiveness": 20,
                 "inference_rate": 20,
-                "model":  MockModel(40)
+                "model":  MockModel(30)
             },
             {
                 "name": "model_3",
                 "training_rate": 400,
                 "efectiveness": 20,
                 "inference_rate": 20,
-                "model":  MockModel(20)
+                "model":  MockModel(10)
             }
         ]
-        self.drift_algorithm = PageHinkley(min_instances=30, delta=0.005, threshold=80, alpha=1 - 0.01)
+        self.drift_algorithm = PageHinkley(min_instances=20, delta=0.005, threshold=10, alpha=1 - 0.01)
         self.dimensionality_reduction = PCA()
-        self.number_training_frames_after_drift = 200
+        self.number_training_frames_after_drift = 10
         
 
 
@@ -88,6 +89,7 @@ class TestHandler(unittest.TestCase):
             drift_algorithm=self.drift_algorithm,
             dimensionality_reduction=self.dimensionality_reduction,
             training_data_topic=self.training_data_topic,
+            is_initial_training_from_topic=self.is_initial_training_from_topic,
             initial_training_data=self.initial_training_data,
             inference_data_topic=self.inference_data_topic
             )
