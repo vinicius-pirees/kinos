@@ -147,13 +147,15 @@ class Handler():
                             for msg in self.inference_data_acquisition.consumer.consumer:
                                 if training_frames_counter >= self.number_training_frames_after_drift:
                                     break
-                                #self.training_after_drift_producer.send_frame(frame_from_bytes_str(msg.value['data']))   
-                                self.training_after_drift_producer.producer.send(self.training_after_drift_producer.topic ,msg.value)     
+                                self.training_after_drift_producer.send_frame(frame_from_bytes_str(msg.value['data']))   
+                                #self.training_after_drift_producer.producer.send(self.training_after_drift_producer.topic,msg.value['data'])     
+                                self.training_after_drift_producer.producer.flush()
                                 training_frames_counter+=1
                                 pbar.update(1)
 
 
                         #Load the new training data
+                        print("Loading new training data")
                         self.training_data_acquirer = TrainingDataAcquisition(topic=self.training_data_topic)
                         self.training_data_acquirer.load()
                         print("New training data loaded")

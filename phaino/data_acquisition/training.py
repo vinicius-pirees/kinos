@@ -47,7 +47,11 @@ class TrainingDataAcquisition():
         if input_data is None:
             self.data = {}
             for msg in self.consumer.consumer:
-                sequence_name = msg.value['sequence_name']
+                sequence_name = msg.value.get('sequence_name')
+
+                if sequence_name is None:
+                    sequence_name = 'sequence'
+
                 if self.data.get(sequence_name) is None:
                     self.data[sequence_name] = []
                 

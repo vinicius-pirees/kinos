@@ -33,7 +33,7 @@ class TestHandler(unittest.TestCase):
 
         
         # # Send training data
-        self.training_data_topic = 'training_2'
+        self.training_data_topic = 'training_3'
 
         # home_dir = '/home/viniciusgoncalves'
         # dataset_location = os.path.join(home_dir,'toy_dataset/adoc/')
