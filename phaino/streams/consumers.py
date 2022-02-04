@@ -17,7 +17,7 @@ from phaino.utils.commons import frame_to_bytes_str, frame_from_bytes_str
 
 #Todo: use GenericConsumer as base class
 class GenericConsumer:
-    def __init__(self, bootstrap_servers, topic, finite=False, set_consumer_timeout_ms=None):
+    def __init__(self, bootstrap_servers, topic, finite=False, set_consumer_timeout_ms=None, group_id_suffix=None):
         self.bootstrap_servers = bootstrap_servers
         self.topic = topic
         
@@ -28,11 +28,16 @@ class GenericConsumer:
               consumer_timeout_ms=float('inf')
             else:
               consumer_timeout_ms=set_consumer_timeout_ms
-            
+
+        if group_id_suffix is None:
+            group_id = project_name
+        else:
+            group_id = project_name + '-' + group_id_suffix
+
         self.consumer = KafkaConsumer(topic,
                                       bootstrap_servers=bootstrap_servers,
                                       auto_offset_reset='earliest',
-                                      group_id=project_name,
+                                      group_id=group_id,
                                       consumer_timeout_ms=consumer_timeout_ms,
                                       enable_auto_commit=True,
                                       value_deserializer=lambda x: json.loads(x.decode('utf-8')))
@@ -46,7 +51,7 @@ class GenericConsumer:
     
 #Todo: Inherit from GenericConsumer
 class ImageConsumer:
-    def __init__(self, bootstrap_servers, topic, finite=False):
+    def __init__(self, bootstrap_servers, topic, finite=False, group_id_suffix=None):
         self.bootstrap_servers = bootstrap_servers
         self.topic = topic
         
@@ -54,11 +59,17 @@ class ImageConsumer:
             consumer_timeout_ms=1000
         else:
             consumer_timeout_ms=float('inf')
+
+
+        if group_id_suffix is None:
+            group_id = project_name
+        else:
+            group_id = project_name + '-' + group_id_suffix
             
         self.consumer = KafkaConsumer(topic,
                                       bootstrap_servers=bootstrap_servers,
                                       auto_offset_reset='earliest',
-                                      group_id=project_name,
+                                      group_id=group_id,
                                       consumer_timeout_ms=consumer_timeout_ms,
                                       enable_auto_commit=True,
                                       value_deserializer=lambda x: json.loads(x.decode('utf-8')))
@@ -75,15 +86,21 @@ class ImageConsumer:
     
 class ImageFiniteConsumer:
 
-    def __init__(self, bootstrap_servers, topic):
+    def __init__(self, bootstrap_servers, topic,  group_id_suffix=None):
         self.bootstrap_servers = bootstrap_servers
         self.topic = topic
+
+        if group_id_suffix is None:
+            group_id = project_name
+        else:
+            group_id = project_name + '-' + group_id_suffix
+        
         self.consumer = KafkaConsumer(topic,
                                       bootstrap_servers=bootstrap_servers,
                                       consumer_timeout_ms=5000,
                                       auto_offset_reset='earliest',
                                       enable_auto_commit=True,
-                                      group_id=project_name,
+                                      group_id=group_id,
                                       value_deserializer=lambda x: json.loads(x.decode('utf-8')))
         
         

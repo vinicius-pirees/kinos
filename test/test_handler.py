@@ -3,6 +3,7 @@ import cv2
 import unittest
 from river.drift import PageHinkley
 from phaino.deploy.handler import Handler
+from phaino.deploy.main_handler import MainHandler
 from phaino.drift.dimensionality_reduction.pca import PCA
 from phaino.models.mock_model import MockModel
 from phaino.streams.producers import VideoProducer
@@ -82,7 +83,7 @@ class TestHandler(unittest.TestCase):
         
 
 
-        self.handler = Handler(
+        self.handler = MainHandler(
             models=self.models,
             user_constraints=self.user_constraints,
             number_training_frames_after_drift=self.number_training_frames_after_drift,

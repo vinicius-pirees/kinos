@@ -21,9 +21,9 @@ class TrainingDataAcquisition():
                 'sequence_2'  [[0, 0, 0, 200], [0, 0, 0, 200]]
             }
     """
-    def __init__(self, topic=None):
+    def __init__(self, topic=None, group_id_suffix=None):
         if topic is not None:
-            self.consumer = ImageFiniteConsumer("localhost:29092", topic)
+            self.consumer = ImageFiniteConsumer("localhost:29092", topic, group_id_suffix=group_id_suffix)
 
         self.set_training_count()
         self.data = {}
