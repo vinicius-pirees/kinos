@@ -44,7 +44,7 @@ class Handler():
             self.training_data_acquirer.load(input_data=initial_training_data)
 
 
-        self.training_after_drift_producer = ImageProducer("localhost:29092", self.training_data_topic, resize_to_dimension=frame_dimension)
+        self.training_after_drift_producer = ImageProducer("localhost:29092", self.training_data_topic, resize_to_dimension=frame_dimension, debug=True)
 
                                             
         self.reset()
@@ -77,7 +77,7 @@ class Handler():
 
 
 
-    def start(self):
+    def drift_aware_flow(self):
 
         with Manager() as manager:
             model_list = manager.list()
@@ -138,6 +138,7 @@ class Handler():
                     in_drift, drift_index = self.drift_detector.drift_check([data])
                     if in_drift:
                         print("Drift detected")
+                        p.join()
 
 
                         #inject new data at training topic
@@ -161,4 +162,10 @@ class Handler():
                         print("New training data loaded")
 
                         self.reset()
-                        sys.exit(0)
+
+        
+
+
+    def start(self):
+        while True:
+            self.drift_aware_flow()            

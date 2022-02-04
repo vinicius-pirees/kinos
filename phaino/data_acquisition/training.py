@@ -1,3 +1,4 @@
+from distutils.log import debug
 import os
 import pickle
 from phaino.streams.consumers import ImageFiniteConsumer
