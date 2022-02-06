@@ -46,19 +46,27 @@ class TrainingDataAcquisition():
 
     def load(self, input_data=None):
         if input_data is None:
-            self.data = {}
+            sequences_data = {}
             for msg in self.consumer.consumer:
                 sequence_name = msg.value.get('sequence_name')
 
                 if sequence_name is None:
                     sequence_name = 'sequence'
 
-                if self.data.get(sequence_name) is None:
-                    self.data[sequence_name] = []
+                if sequences_data.get(sequence_name) is None:
+                    sequences_data[sequence_name] = []
                 
-                self.data[sequence_name].append(frame_from_bytes_str(msg.value['data']))
+                sequences_data[sequence_name].append(frame_from_bytes_str(msg.value['data']))
         else:
-            self.data = input_data
+            sequences_data = input_data
+
+
+        if isinstance(sequences_data, dict):
+            self.data = []
+            for _, value in sequences_data.items():
+                self.data.append(value)
+        else:
+            self.data = sequences_data
 
         # Save the training data
         self.train_name = 'training_data_' + str(self.training_count)
@@ -66,7 +74,7 @@ class TrainingDataAcquisition():
         os.makedirs(path, exist_ok=True)
         
         with open(os.path.join(path, "data.pkl"),"wb") as handle:
-            pickle.dump(self.data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(sequences_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         self.training_count+=1
 

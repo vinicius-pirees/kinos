@@ -36,6 +36,7 @@ class Gaussian:
         self.pca_n_components = pca_n_components
         self.spatio_temporal_features = spatio_temporal_features
         self.spatio_temporal_depth = spatio_temporal_depth
+        self.sequence_size = spatio_temporal_depth
         self.spatio_temporal_sequence_size = spatio_temporal_sequence_size
         self.pca_set = None
         self.training_data_name=None
@@ -56,9 +57,15 @@ class Gaussian:
         return self.means, self.variances, self.stds
     
     
-    def predict(self, x):
-        x = generate_features_frames([x], cube_depth=self.spatio_temporal_depth, tile_size=self.spatio_temporal_sequence_size)
+    def predict(self, sequence):
+
+        x = generate_features_frames(sequence, cube_depth=self.spatio_temporal_depth, tile_size=self.spatio_temporal_sequence_size)
         x = x[0]
+
+
+        if self.pca:
+            x = self.pca_set.transform(x)
+
         calc_gaussian = lambda x, mu, sigma: (1.0 / (sigma * np.sqrt(2 * np.pi))) * np.exp( -(x - mu)**2 / (2 * sigma**2) )
 
         gaussian  = calc_gaussian(x, self.means, self.stds)
@@ -134,7 +141,7 @@ class Gaussian:
             if self.spatio_temporal_features:
                 logger.info('Generating spatio-temporal features')
                 for sequence in training_set:
-                    temp_training_set += generate_features_frames(sequence, cube_depth=self.spatio_temporal_depth, tile_size=self.spatio_temporal_sequence_size)
+                    temp_training_set += generate_features_frames(sequence, cube_depth=self.spatio_temporal_depth, tile_size=self.spatio_temporal_sequence_size, description=self.model_name)
             else:
                 for sequence in training_set:
                     temp_training_set += sequence
@@ -142,7 +149,7 @@ class Gaussian:
         else:
             if self.spatio_temporal_features:
                 logger.info('Generating spatio-temporal features')
-                temp_training_set = generate_features_frames(training_set, cube_depth=self.spatio_temporal_depth, tile_size=self.spatio_temporal_sequence_size)
+                temp_training_set = generate_features_frames(training_set, cube_depth=self.spatio_temporal_depth, tile_size=self.spatio_temporal_sequence_size, description=self.model_name)
             else:
                 temp_training_set = training_set
 

@@ -5,46 +5,36 @@ from river.drift import PageHinkley
 from phaino.deploy.handler import Handler
 from phaino.deploy.main_handler import MainHandler
 from phaino.drift.dimensionality_reduction.pca import PCA
+from phaino.models.gaussian import Gaussian
 from phaino.models.mock_model import MockModel
 from phaino.streams.producers import VideoProducer
 from sklearn.datasets import load_sample_images
 
 
 
-class TestHandler(unittest.TestCase):
+class TestHandlerReal(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
 
-        self.is_initial_training_from_topic = False    
+        self.is_initial_training_from_topic = True   
+        self.initial_training_data  = None
 
         self.inference_data_topic = 'inference_5'
-
-
-        # Mock training data
-        self.training_data_topic = None
-        dataset = load_sample_images() 
-        sequence_1 = [dataset.images[0] for x in range(20)]
-        sequence_2 = [dataset.images[1] for x in range(20)]
-        self.initial_training_data = sequence_1 + sequence_2
-
-        for i in range(0, len(self.initial_training_data)):
-            self.initial_training_data[i] = cv2.resize(self.initial_training_data[i], (256,256))
-        
 
         
         # # Send training data
         self.training_data_topic = 'training_3'
 
-        # home_dir = '/home/viniciusgoncalves'
-        # dataset_location = os.path.join(home_dir,'toy_dataset/adoc/')
-        # video_files = os.listdir(dataset_location)
-        # train_video_files = [x for x in video_files if x[0:5] == 'train']
-        # train_video_files.sort()
-        # train_video_files = train_video_files[1:2] # not all videos for test
-        # for video in train_video_files:
-        #     video_producer = VideoProducer("localhost:29092", self.training_data_topic, os.path.join(dataset_location, video), debug=True, resize_to_dimension=(256,256))
-        #     video_producer.send_video(extra_fields={"sequence_name": video})
+        home_dir = '/home/viniciusgoncalves'
+        dataset_location = os.path.join(home_dir,'toy_dataset/adoc/')
+        video_files = os.listdir(dataset_location)
+        train_video_files = [x for x in video_files if x[0:5] == 'train']
+        train_video_files.sort()
+        train_video_files = train_video_files[1:2] # not all videos for test
+        for video in train_video_files:
+            video_producer = VideoProducer("localhost:29092", self.training_data_topic, os.path.join(dataset_location, video), debug=True, resize_to_dimension=(256,256))
+            video_producer.send_video(extra_fields={"sequence_name": video})
 
 
 
@@ -56,26 +46,20 @@ class TestHandler(unittest.TestCase):
         
         self.models = [
             {
-                "name": "model_1",
+                "name": "gaussian_1",
                 "training_rate": 200,
                 "efectiveness": 30,
                 "inference_rate": 10,
-                "model":  MockModel(40)
+                "model":  Gaussian(model_name='gaussian_1', pca=True, pca_n_components=.95)
             },
             {
-                "name": "model_2",
-                "training_rate": 300,
-                "efectiveness": 20,
-                "inference_rate": 20,
-                "model":  MockModel(30)
+                "name": "gaussian_2",
+                "training_rate": 250,
+                "efectiveness": 25,
+                "inference_rate": 10,
+                "model":  Gaussian(model_name='gaussian_2', pca=True, pca_n_components=.90)
             },
-            {
-                "name": "model_3",
-                "training_rate": 400,
-                "efectiveness": 20,
-                "inference_rate": 20,
-                "model":  MockModel(10)
-            }
+           
         ]
         self.drift_algorithm = PageHinkley(min_instances=20, delta=0.005, threshold=10, alpha=1 - 0.01)
         self.dimensionality_reduction = PCA()

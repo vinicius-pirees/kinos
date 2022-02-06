@@ -52,8 +52,13 @@ num_frames = 30
 
 
 
-video_files = ['/home/viniciusgoncalves/toy_dataset/adoc/test_drift_two_rainn_1.avi',
-                '/home/viniciusgoncalves/toy_dataset/adoc/train_1.avi']
+# video_files = ['/home/viniciusgoncalves/toy_dataset/adoc/test_drift_two_rainn_1.avi',
+#                 '/home/viniciusgoncalves/toy_dataset/adoc/train_1.avi']
+
+
+
+video_files = ['/home/viniciusgoncalves/toy_dataset/adoc/train_1.avi', 
+                '/home/viniciusgoncalves/toy_dataset/adoc/test_drift_two_rainn_1.avi']
 
 for video in video_files:
     print("Sending", video)

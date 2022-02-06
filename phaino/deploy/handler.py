@@ -1,5 +1,6 @@
 import time
 import sys
+import logging
 from tqdm import tqdm
 from multiprocessing import Process, Manager, Queue
 from multiprocessing.managers import BaseManager
@@ -10,6 +11,9 @@ from phaino.data_acquisition.inference import InferenceDataAcquisition
 from phaino.streams.producers import ImageProducer
 from phaino.utils.commons import frame_from_bytes_str
 
+
+logging.basicConfig(level = logging.INFO, format='%(filename)s - %(asctime)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 class Handler():
@@ -28,6 +32,7 @@ class Handler():
             ):
         self.models= models
         self.user_constraints = user_constraints
+        self.sequence_size = 1
         self.training_data_topic = training_data_topic
         self.number_training_frames_after_drift = number_training_frames_after_drift
         self.inference_data_acquisition = InferenceDataAcquisition(topic=inference_data_topic)
@@ -37,7 +42,7 @@ class Handler():
 
 
         if is_initial_training_from_topic:
-            self.training_data_acquirer = TrainingDataAcquisition(topic=self.training_data_topic)
+            self.training_data_acquirer = TrainingDataAcquisition(topic=self.training_data_topic, group_id_suffix='training')
             self.training_data_acquirer.load()
         else:
             self.training_data_acquirer = TrainingDataAcquisition()
@@ -45,7 +50,6 @@ class Handler():
 
 
         self.training_after_drift_producer = ImageProducer("localhost:29092", self.training_data_topic, resize_to_dimension=frame_dimension, debug=True)
-
                                             
         self.reset()
 
@@ -54,17 +58,7 @@ class Handler():
         
 
     def reset(self):
-
-
-
         self.training_manager = TrainingManager(self.models, self.user_constraints, self.model_queue)
-
-        # BaseManager.register('TrainingManager', TrainingManager)
-        # manager = BaseManager()
-        # manager.start()
-        # self.training_manager = manager.TrainingManager(self.models, self.user_constraints)
-
-        
 
         training_sequence = []
         if isinstance(self.training_data_acquirer.data, dict):
@@ -87,58 +81,55 @@ class Handler():
                                                                     model_list))
             p.start()
 
-            print("Waiting for an available model")
+            logger.info("Waiting for an available model")
+
+            sequence_counter = 0
+            sequence = []
 
             while True:
-                # model = self.model_queue.get()
-                # print("Model ready")
-
-                # if self.training_manager.get_current_model() is None:
-                #     time.sleep(10)
-                #     print("No model is available yet!")
-                #     continue
-
                 try:
                     model = model_list[-1]
                     model_list.pop()
-                    #model_list = manager.list()
+                    if model.sequence_size is not None:
+                        self.sequence_size = model.sequence_size
                 except IndexError as e:
                     sleep_seconds = 5
-                    print(f"No model is available yet, checking again in {sleep_seconds} seconds")
+                    logger.info(f"No model is available yet, checking again in {sleep_seconds} seconds")
                     time.sleep(sleep_seconds)
                     continue
 
                 
-
-                for msg in self.inference_data_acquisition.consumer.consumer:
-
-                    # new_model = self.model_queue.get_nowait()
-                    # if new_model is not None:
-                    #     model = new_model
-                    #     print("Switching model")
-
-                    # if not self.model_queue.empty:
-                    #     model = self.model_queue.get()
-                    #     print("Switching model")
-
+                for msg in self.inference_data_acquisition.consumer.consumer:    
                     try:
                         model = model_list[-1]
                         model_list.pop()
-                        print("Switching model")
+                        logger.info("Switching model")
+                        if model.sequence_size is not None:
+                            self.sequence_size = model.sequence_size
                     except IndexError as e:
                         pass
 
 
-
                     data = frame_from_bytes_str(msg.value['data'])
-                    # TODO send to prediction topic?
-                    prediciton = model.predict(data)
+
+                    if self.sequence_size > 1:
+                        sequence.append(data)
+                        sequence_counter+=1
+                        if sequence_counter == self.sequence_size:
+                            prediciton = model.predict(sequence) # TODO send to prediction topic?
+                            print(prediciton)
+                            sequence_counter = 0
+                            sequence = []
+                    else:
+                        prediciton = model.predict(data)  # TODO send to prediction topic?
+
+                    
                     time.sleep(1)
 
                     in_drift, drift_index = self.drift_detector.drift_check([data])
                     if in_drift:
-                        print("Drift detected")
-                        p.join()
+                        logger.info("Drift detected")
+                        #p.join()
                         p.terminate()
                         return True
 

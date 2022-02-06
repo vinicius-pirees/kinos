@@ -121,7 +121,7 @@ def generate_features(frame_sequence,cube_depth,tile_size):
 #     return result.reshape(result.shape[0], result.shape[1]*result.shape[2]) #shape (total_sequences, features)
 
 
-def generate_features_frames(frames, cube_depth=5, tile_size=10):
+def generate_features_frames_old(frames, cube_depth=5, tile_size=10):
     counter = 0
     frame_sequence = []
     original_frame_sequence = []
@@ -155,8 +155,8 @@ def generate_features_frames(frames, cube_depth=5, tile_size=10):
             counter+=1
         else:
             if counter == 0:
-                counter+=1
-                continue
+               counter+=1
+               continue
 
             # To grayscale
             frame = frame_to_gray(frame)
@@ -166,3 +166,26 @@ def generate_features_frames(frames, cube_depth=5, tile_size=10):
             counter+=1
             
     return results
+
+
+
+def divide_chunks(l, n):
+    for i in range(0, len(l), n): 
+        yield l[i:i + n]
+
+
+def generate_features_frames(frames, cube_depth=5, tile_size=10, description=''):
+    results = []
+    sequences = list(divide_chunks(frames, cube_depth))
+
+    if len(sequences[-1]) != cube_depth: ## If last sequence does not have sufficient frames, leave it out
+        sequences = sequences[0:-1]
+
+    for sequence in tqdm(sequences, desc=description):
+        sequence = [reduce_frame(frame_to_gray(frame)) for frame in sequence]
+        features = generate_features(sequence, cube_depth, tile_size)
+        result = features.reshape(1, features.shape[0]*features.shape[1])
+        results.append(result)
+
+    return results
+

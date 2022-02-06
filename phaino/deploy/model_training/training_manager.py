@@ -1,8 +1,13 @@
 import sys
 import time
+import logging
 from multiprocessing import Process, Queue, Array, Manager
 from phaino.deploy.model_training.model_selection import assign_models_priority
 
+
+
+logging.basicConfig(level = logging.INFO, format='%(asctime)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 class TrainingManager():
@@ -25,11 +30,11 @@ class TrainingManager():
         
 
     def handle_training(self, model, priority, message_queue, insufficient_capacity_list, training_data=None, training_data_name=None, model_list=None):
-        print("priority", priority)
+        logger.info(f"priority {priority}")
         try:
             model.fit(training_data, training_data_name)
         except Exception as e: #TODO Consider only exceptions related to lack of computing capacity
-            print(e)
+            logger.info(e)
             if priority not in insufficient_capacity_list:
                 # Append to array
                 insufficient_capacity_list.append(priority)
@@ -44,16 +49,14 @@ class TrainingManager():
         message_queue.put(priority) # Notify
         
         if self.model_queue is not None:
-            #print("Getting here with model priority", priority)
             self.model_queue.put(model)
 
         if model_list is not None:
-            print("Getting here with model priority", priority)
             model_list.append(model)
 
         self.current_model = model # Switch to model
 
-        print(insufficient_capacity_list)
+        logger.debug("insufficient_capacity_list " +  str(insufficient_capacity_list))
         if priority in insufficient_capacity_list:
                 self.__remove_from_insufficient_list(priority, insufficient_capacity_list) 
 
@@ -77,7 +80,7 @@ class TrainingManager():
                 if process is not None:
                     model_info = self.models_indexed_by_priority[priority]
                     if process.is_alive():
-                        print(f'Stopping process {process.name}, model_info: {model_info}')
+                        logger.info(f'Stopping process {process.name}, model_info: {model_info}')
                         process.terminate()
 
     def adapt(self, training_data=None, training_data_name=None, model_list=None):
@@ -99,11 +102,12 @@ class TrainingManager():
                 priority = self.message_queue.get()
                 time.sleep(1)
 
-                print("Finished priority", priority)
+                logger.info(f"Finished priority {priority}")
 
                 if priority == 0:
-                    print("Finishing training since the model with highest priority is ready")
+                    logger.info("Finishing training since the model with highest priority is ready")
                     #sys.exit(0)
+                    self.__stop_lower_priority(0)
                     return 0
                 else:
                     self.__stop_lower_priority(priority)
@@ -115,7 +119,7 @@ class TrainingManager():
         Uses the current model to make the inference
         """
         if self.current_model is None:
-            print('The training is not yet finished!')
+            logger.info('The training is not yet finished!')
         else:
             self.current_model.predict(example)
 
