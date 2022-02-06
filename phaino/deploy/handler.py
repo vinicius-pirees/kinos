@@ -90,7 +90,8 @@ class Handler():
                 try:
                     model = model_list[-1]
                     model_list.pop()
-                    if model.sequence_size is not None:
+                    
+                    if hasattr(model, 'sequence_size'):
                         self.sequence_size = model.sequence_size
                 except IndexError as e:
                     sleep_seconds = 5
@@ -104,7 +105,7 @@ class Handler():
                         model = model_list[-1]
                         model_list.pop()
                         logger.info("Switching model")
-                        if model.sequence_size is not None:
+                        if hasattr(model, 'sequence_size'):
                             self.sequence_size = model.sequence_size
                     except IndexError as e:
                         pass
