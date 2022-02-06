@@ -8,6 +8,12 @@ from phaino.drift.dimensionality_reduction.pca import PCA
 from phaino.models.mock_model import MockModel
 from phaino.streams.producers import VideoProducer
 from sklearn.datasets import load_sample_images
+from phaino.config.config import PhainoConfiguration
+
+
+config = PhainoConfiguration().get_config()
+profile = config['general']['profile']
+ADOC_DATASET_LOCATION = config[profile]['adoc_dataset_location']
 
 
 
@@ -36,14 +42,13 @@ class TestHandler(unittest.TestCase):
         # # Send training data
         self.training_data_topic = 'training_3'
 
-        # home_dir = '/home/viniciusgoncalves'
-        # dataset_location = os.path.join(home_dir,'toy_dataset/adoc/')
-        # video_files = os.listdir(dataset_location)
+        # adoc_dataset_location = ADOC_DATASET_LOCATION
+        # video_files = os.listdir(adoc_dataset_location)
         # train_video_files = [x for x in video_files if x[0:5] == 'train']
         # train_video_files.sort()
         # train_video_files = train_video_files[1:2] # not all videos for test
         # for video in train_video_files:
-        #     video_producer = VideoProducer("localhost:29092", self.training_data_topic, os.path.join(dataset_location, video), debug=True, resize_to_dimension=(256,256))
+        #     video_producer = VideoProducer("localhost:29092", self.training_data_topic, os.path.join(adoc_dataset_location, video), debug=True, resize_to_dimension=(256,256))
         #     video_producer.send_video(extra_fields={"sequence_name": video})
 
 
