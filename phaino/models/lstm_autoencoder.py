@@ -193,7 +193,11 @@ class LSTMAutoEncoder:
     def predict(self, frame_sequence):
         transformed_frames = self.input_frames_transform(np.array(frame_sequence))
         transformed_frames = self.get_training_set(transformed_frames)
-        frame_sequence = np.reshape(transformed_frames, (1,) + transformed_frames.shape)
+        transformed_frames = np.array(transformed_frames)
+        
+        
+        #frame_sequence = np.reshape(transformed_frames, (1,) + transformed_frames.shape)
+        frame_sequence = transformed_frames
 
         reconstructed_sequence = self.model.predict(frame_sequence,batch_size=self.batch_size)
         reconstruction_cost = np.linalg.norm(np.subtract(frame_sequence,reconstructed_sequence))
@@ -201,13 +205,11 @@ class LSTMAutoEncoder:
     
     
     
-    def load_model(self):
-        base_path = resolve_model_path(self.model_name)
-        path = os.path.join(base_path, 'model')
+    def load_model(self, path):
         self.model = load_model(path, custom_objects={'LayerNormalization': LayerNormalization})
 
     def load_last_model(self):
-        base_path = resolve_model_path(self.model_name)
+        base_path = get_last_model_path(self.model_name)
         path = os.path.join(base_path, 'model')
         self.load_model(path)    
         

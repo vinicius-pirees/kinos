@@ -6,6 +6,7 @@ from phaino.deploy.handler import Handler
 from phaino.deploy.main_handler import MainHandler
 from phaino.drift.dimensionality_reduction.pca import PCA
 from phaino.models.gaussian import Gaussian
+from phaino.models.lstm_autoencoder import LSTMAutoEncoder
 from phaino.models.mock_model import MockModel
 from phaino.streams.producers import VideoProducer
 from sklearn.datasets import load_sample_images
@@ -63,6 +64,15 @@ class TestHandlerReal(unittest.TestCase):
                 "inference_rate": 10,
                 "model":  Gaussian(model_name='gaussian_2', pca=True, pca_n_components=.90)
             },
+            {
+                "name": "lstm_1",
+                "training_rate": 30,
+                "efectiveness": 60,
+                "inference_rate": 3,
+                "model":  LSTMAutoEncoder(model_name='lstm_1', epochs=1)
+            },
+            
+            
            
         ]
         self.drift_algorithm = PageHinkley(min_instances=20, delta=0.005, threshold=10, alpha=1 - 0.01)
