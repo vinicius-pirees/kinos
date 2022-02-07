@@ -168,7 +168,8 @@ class LSTMAutoEncoder:
         
     def save_model(self):
         logger.info(f"Saving the model {self.model_name}")
-        path = resolve_model_path(self.model_name)
+        base_path = resolve_model_path(self.model_name)
+        path = os.path.join(base_path, 'model')
         self.model.save(path)
 
 
@@ -181,7 +182,7 @@ class LSTMAutoEncoder:
            
         }
 
-        with open(os.path.join(path, "metadata.json"), "w") as outfile:
+        with open(os.path.join(base_path, "metadata.json"), "w") as outfile:
             json.dump(metadata, outfile)
 
         
@@ -201,11 +202,13 @@ class LSTMAutoEncoder:
     
     
     def load_model(self):
-        path = resolve_model_path(self.model_name)
+        base_path = resolve_model_path(self.model_name)
+        path = os.path.join(base_path, 'model')
         self.model = load_model(path, custom_objects={'LayerNormalization': LayerNormalization})
 
     def load_last_model(self):
-        path = get_last_model_path(self.model_name)
+        base_path = resolve_model_path(self.model_name)
+        path = os.path.join(base_path, 'model')
         self.load_model(path)    
         
 
