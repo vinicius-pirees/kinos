@@ -53,7 +53,8 @@ inference_data_topic = 'inference_5'
 # Real data, two videos
 image_producer = ImageProducer("localhost:29092", inference_data_topic, max_message_size_mb=8, debug=True, resize_to_dimension=(256,256))
 
-num_frames = 30
+#num_frames = 30
+num_frames = 100
 
 
 
