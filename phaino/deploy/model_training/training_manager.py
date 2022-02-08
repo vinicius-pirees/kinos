@@ -47,11 +47,10 @@ class TrainingManager():
 
 
         message_queue.put(priority) # Notify
-        
-        if self.model_queue is not None:
-            self.model_queue.put(model)
 
         if model_list is not None:
+            if hasattr(model, 'model'):
+                model.model = None # Must set model as None due to multiprocessing (in order to pickle and unpickle later). Some objects are no pickable
             model_list.append(model)
 
         self.current_model = model # Switch to model

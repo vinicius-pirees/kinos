@@ -165,6 +165,7 @@ class Gaussian:
 
 
         self.update_model(final_training_set)
+        self.save_model()
          
     def save_model(self):
         logger.info(f"Saving the model {self.model_name}")

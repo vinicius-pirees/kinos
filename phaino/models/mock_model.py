@@ -30,3 +30,6 @@ class MockModel():
 
     def predict(self, examples):
         return 1
+
+    def load_last_model(self):
+        return

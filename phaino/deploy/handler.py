@@ -89,6 +89,7 @@ class Handler():
             while True:
                 try:
                     model = model_list[-1]
+                    model.load_last_model()
                     model_list.pop()
                     
                     if hasattr(model, 'sequence_size'):
@@ -103,6 +104,7 @@ class Handler():
                 for msg in self.inference_data_acquisition.consumer.consumer:    
                     try:
                         model = model_list[-1]
+                        model.load_last_model()
                         model_list.pop()
                         logger.info("Switching model")
                         if hasattr(model, 'sequence_size'):

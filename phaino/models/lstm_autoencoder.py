@@ -163,7 +163,7 @@ class LSTMAutoEncoder:
                 batch_size=self.batch_size, epochs=self.epochs, shuffle=False)
 
         self.model = seq
-        print('veio')
+        self.save_model()
         
         
     def save_model(self):
