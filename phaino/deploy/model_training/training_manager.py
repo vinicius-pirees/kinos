@@ -2,6 +2,7 @@ import sys
 import time
 import logging
 from multiprocessing import Process, Queue, Array, Manager
+import pathos
 from phaino.deploy.model_training.model_selection import assign_models_priority
 
 
@@ -21,7 +22,7 @@ class TrainingManager():
             self.models_indexed_by_priority[model["priority"]] = model
 
         self.process_map = {}
-        self.message_queue = Queue()
+        self.message_queue = pathos.helpers.mp.Queue()
         self.n_models = len(models)
 
 
@@ -86,13 +87,13 @@ class TrainingManager():
     def adapt(self, training_data=None, training_data_name=None, model_list=None):
         priorities = list(range(0, self.n_models))
 
-        with Manager() as manager:
+        with pathos.helpers.mp.Manager() as manager:
             insufficient_capacity_list = manager.list()
 
             for priority in priorities:
                 model = self.models_indexed_by_priority[priority]
                 model_class = model['model']
-                p = Process(target=self.handle_training, args=(model_class, priority, self.message_queue,insufficient_capacity_list,training_data, training_data_name, model_list))
+                p = pathos.helpers.mp.Process(target=self.handle_training, args=(model_class, priority, self.message_queue,insufficient_capacity_list,training_data, training_data_name, model_list))
                 p.start()
                 self.process_map[priority] = p
                 time.sleep(0.05) # Avoid processes to be launched out of order

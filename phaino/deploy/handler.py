@@ -3,6 +3,7 @@ import sys
 import logging
 from tqdm import tqdm
 from multiprocessing import Process, Manager, Queue
+import pathos
 from multiprocessing.managers import BaseManager
 from phaino.deploy.model_training.training_manager import TrainingManager
 from phaino.drift.detector import DriftDetector
@@ -38,7 +39,7 @@ class Handler():
         self.inference_data_acquisition = InferenceDataAcquisition(topic=inference_data_topic)
         self.drift_detector = DriftDetector(dimensionality_reduction=dimensionality_reduction,
                                             drift_algorithm=drift_algorithm)
-        self.model_queue = Queue()
+        self.model_queue = pathos.helpers.mp.Queue()
 
 
         if is_initial_training_from_topic:
@@ -73,10 +74,10 @@ class Handler():
 
     def start(self):
 
-        with Manager() as manager:
+        with pathos.helpers.mp.Manager() as manager:
             model_list = manager.list()
 
-            p = Process(target=self.training_manager.adapt, args=(self.training_data_acquirer.data, 
+            p = pathos.helpers.mp.Process(target=self.training_manager.adapt, args=(self.training_data_acquirer.data, 
                                                                     self.training_data_acquirer.train_name,
                                                                     model_list))
             p.start()
