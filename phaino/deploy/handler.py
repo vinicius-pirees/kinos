@@ -146,6 +146,7 @@ class Handler():
                         #self.training_manager.stop_all_processes()
                         self.kill_child_proc(p.pid)
                         p.terminate()
+                        #os.system('kill {0}'.format(p.pid))
                         return True
 
 

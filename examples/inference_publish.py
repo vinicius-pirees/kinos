@@ -20,8 +20,8 @@ inference_data_topic = 'inference_5'
 
 
 
-mode = 'mock'
-#mode = 'real'
+#mode = 'mock'
+mode = 'real'
 
 
 if mode == 'mock':
@@ -47,8 +47,8 @@ if mode == 'real':
     # Real data, two videos
     image_producer = ImageProducer("localhost:29092", inference_data_topic, max_message_size_mb=8, debug=True, resize_to_dimension=(256,256))
 
-    #num_frames = 30
-    num_frames = 100
+    num_frames = 30
+    #num_frames = 100
 
 
     # video_files = ['test_drift_two_rainn_1.avi','train_1.avi']

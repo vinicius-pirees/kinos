@@ -86,9 +86,10 @@ class ImageConsumer:
     
 class ImageFiniteConsumer:
 
-    def __init__(self, bootstrap_servers, topic,  group_id_suffix=None):
+    def __init__(self, bootstrap_servers, topic,  group_id_suffix=None, consumer_timeout_ms=5000):
         self.bootstrap_servers = bootstrap_servers
         self.topic = topic
+        self.consumer_timeout_ms = consumer_timeout_ms
 
         if group_id_suffix is None:
             group_id = project_name
@@ -97,7 +98,7 @@ class ImageFiniteConsumer:
         
         self.consumer = KafkaConsumer(topic,
                                       bootstrap_servers=bootstrap_servers,
-                                      consumer_timeout_ms=5000,
+                                      consumer_timeout_ms=consumer_timeout_ms,
                                       auto_offset_reset='earliest',
                                       enable_auto_commit=True,
                                       group_id=group_id,

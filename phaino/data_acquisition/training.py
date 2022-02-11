@@ -11,6 +11,11 @@ profile = config['general']['profile']
 project_name  = config['general']['project_name']
 
 
+
+class DataNotFoundException(Exception):
+    pass
+ 
+
 class TrainingDataAcquisition():
     """
     If input_data is defined, then the topic data is ignored
@@ -67,6 +72,9 @@ class TrainingDataAcquisition():
                 self.data.append(value)
         else:
             self.data = sequences_data
+            
+        if len(self.data) == 0:
+            raise DataNotFoundException("There is not data to proceed with the training")
 
         # Save the training data
         self.train_name = 'training_data_' + str(self.training_count)

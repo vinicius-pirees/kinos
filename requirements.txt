@@ -11,3 +11,4 @@ opencv-python>=4.0
 matplotlib==3.3.3
 tqdm
 river>=0.8.0
+psutil
