@@ -82,6 +82,15 @@ class TrainingManager():
                         logger.info(f'Stopping process {process.name}, model_info: {model_info}')
                         process.terminate()
 
+    def stop_all_processes(self):
+        for priority, process in self.process_map.items():
+            if process is not None:
+                model_info = self.models_indexed_by_priority[priority]
+                if process.is_alive():
+                    logger.info(f'Stopping process {process.name}, model_info: {model_info}')
+                    process.terminate()
+
+
     def adapt(self, training_data=None, training_data_name=None, model_list=None):
         priorities = list(range(0, self.n_models))
 

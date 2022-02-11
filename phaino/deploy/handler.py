@@ -1,6 +1,8 @@
 import time
 import sys
 import logging
+import os
+import psutil
 from tqdm import tqdm
 from multiprocessing import Process, Manager, Queue
 from multiprocessing.managers import BaseManager
@@ -54,7 +56,15 @@ class Handler():
         self.reset()
 
 
-
+    def kill_child_proc(self, ppid):
+        for process in psutil.process_iter():
+            _ppid = process.ppid()
+            if _ppid == ppid:
+                _pid = process.pid
+                if sys.platform == 'win32':
+                    process.terminate()
+                else:
+                    os.system('kill -9 {0}'.format(_pid))
         
 
     def reset(self):
@@ -133,6 +143,8 @@ class Handler():
                     if in_drift:
                         logger.info("Drift detected")
                         #p.join()
+                        #self.training_manager.stop_all_processes()
+                        self.kill_child_proc(p.pid)
                         p.terminate()
                         return True
 
