@@ -197,9 +197,23 @@ class Gaussian:
         self.means = model['means']
         self.variances = model['variances']
         self.stds = model['stds']
+
+        with open(os.path.join(os.path.dirname(path), "metadata.json")) as infile:
+            metadata = json.load(infile)
+        
+        self.training_data_name = metadata['training_data_name']
         
     def load_last_model(self):
         path = get_last_model_path(self.model_name)
         self.pca_set = pickle.load(open(os.path.join(path, "pca.pkl"),'rb'))
+
+        
+
+        
         return self.load_model(os.path.join(path, 'model.pkl'))
+
+
+        
+
+
     

@@ -17,7 +17,7 @@ from phaino.utils.commons import frame_to_bytes_str, frame_from_bytes_str
 
 #Todo: use GenericConsumer as base class
 class GenericConsumer:
-    def __init__(self, bootstrap_servers, topic, finite=False, set_consumer_timeout_ms=None, group_id_suffix=None):
+    def __init__(self, bootstrap_servers, topic, finite=False, set_consumer_timeout_ms=None, group_id_suffix=None, enable_auto_commit=True):
         self.bootstrap_servers = bootstrap_servers
         self.topic = topic
         
@@ -39,7 +39,7 @@ class GenericConsumer:
                                       auto_offset_reset='earliest',
                                       group_id=group_id,
                                       consumer_timeout_ms=consumer_timeout_ms,
-                                      enable_auto_commit=True,
+                                      enable_auto_commit=enable_auto_commit,
                                       value_deserializer=lambda x: json.loads(x.decode('utf-8')))
 
         
@@ -51,7 +51,7 @@ class GenericConsumer:
     
 #Todo: Inherit from GenericConsumer
 class ImageConsumer:
-    def __init__(self, bootstrap_servers, topic, finite=False, group_id_suffix=None):
+    def __init__(self, bootstrap_servers, topic, finite=False, group_id_suffix=None, enable_auto_commit=True):
         self.bootstrap_servers = bootstrap_servers
         self.topic = topic
         
@@ -71,7 +71,7 @@ class ImageConsumer:
                                       auto_offset_reset='earliest',
                                       group_id=group_id,
                                       consumer_timeout_ms=consumer_timeout_ms,
-                                      enable_auto_commit=True,
+                                      enable_auto_commit=enable_auto_commit,
                                       value_deserializer=lambda x: json.loads(x.decode('utf-8')))
 
         
@@ -86,7 +86,7 @@ class ImageConsumer:
     
 class ImageFiniteConsumer:
 
-    def __init__(self, bootstrap_servers, topic,  group_id_suffix=None, consumer_timeout_ms=5000):
+    def __init__(self, bootstrap_servers, topic,  group_id_suffix=None, consumer_timeout_ms=5000, enable_auto_commit=True):
         self.bootstrap_servers = bootstrap_servers
         self.topic = topic
         self.consumer_timeout_ms = consumer_timeout_ms
@@ -100,7 +100,7 @@ class ImageFiniteConsumer:
                                       bootstrap_servers=bootstrap_servers,
                                       consumer_timeout_ms=consumer_timeout_ms,
                                       auto_offset_reset='earliest',
-                                      enable_auto_commit=True,
+                                      enable_auto_commit=enable_auto_commit,
                                       group_id=group_id,
                                       value_deserializer=lambda x: json.loads(x.decode('utf-8')))
         

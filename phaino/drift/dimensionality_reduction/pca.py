@@ -18,7 +18,6 @@ class PCA():
         final_training_set = np.array(temp_training_set)
         final_training_set = final_training_set/255 
         
-        print("SHAAAPE", final_training_set.shape)
         # Stack values for PCA
         final_training_set = final_training_set.reshape(final_training_set.shape[0], final_training_set.shape[1]* final_training_set.shape[2] * final_training_set.shape[3])
 

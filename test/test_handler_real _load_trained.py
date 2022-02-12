@@ -24,13 +24,16 @@ class TestHandlerReal(unittest.TestCase):
     @classmethod
     def setUpClass(self):
 
-        self.is_initial_training_from_topic = True   
-        self.initially_load_models  = False
+        self.is_initial_training_from_topic = False   
+        self.initially_load_models  = True
         self.initial_training_data  = None
 
         self.inference_data_topic = 'inference_5'
         self.prediction_result_topic = 'prediction'
         self.training_data_topic = 'training_3'
+
+
+        
 
         
         # # Send training data
@@ -67,19 +70,12 @@ class TestHandlerReal(unittest.TestCase):
                 "efectiveness": 25,
                 "inference_rate": 10,
                 "model":  Gaussian(model_name='gaussian_2', pca=True, pca_n_components=.90)
-            },
-            {
-                "name": "lstm_1",
-                "training_rate": 30,
-                "efectiveness": 60,
-                "inference_rate": 3,
-                "model":  LSTMAutoEncoder(model_name='lstm_1', epochs=1)
-            },
+            }
             
             
            
         ]
-        self.drift_algorithm = PageHinkley(min_instances=20, delta=0.005, threshold=10, alpha=1 - 0.01)
+        self.drift_algorithm = PageHinkley(min_instances=10, delta=0.005, threshold=10, alpha=1 - 0.01)
         self.dimensionality_reduction = PCA()
         self.number_training_frames_after_drift = 10
         

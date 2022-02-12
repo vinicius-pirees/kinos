@@ -29,21 +29,27 @@ class TrainingManager():
         return self.current_model
         
 
-    def handle_training(self, model, priority, message_queue, insufficient_capacity_list, training_data=None, training_data_name=None, model_list=None):
+    def handle_training(self, model, priority, message_queue, insufficient_capacity_list, training_data=None, training_data_name=None, model_list=None, load_models=False):
+        
         logger.info(f"priority {priority}")
-        try:
-            model.fit(training_data, training_data_name)
-        except Exception as e: #TODO Consider only exceptions related to lack of computing capacity
-            logger.info(e)
-            if priority not in insufficient_capacity_list:
-                # Append to array
-                insufficient_capacity_list.append(priority)
 
-            # Stop process and remove it from the process map, if map is filled
-            if  self.process_map.get(priority) is not None:
-                self.process_map[priority].terminate()
-                self.process_map.pop(priority)
-            return
+        if load_models:
+            logger.info("Loading previously trained model")
+        else:
+            logger.info(f"priority {priority}")
+            try:
+                model.fit(training_data, training_data_name)
+            except Exception as e: #TODO Consider only exceptions related to lack of computing capacity
+                logger.info(e)
+                if priority not in insufficient_capacity_list:
+                    # Append to array
+                    insufficient_capacity_list.append(priority)
+
+                # Stop process and remove it from the process map, if map is filled
+                if  self.process_map.get(priority) is not None:
+                    self.process_map[priority].terminate()
+                    self.process_map.pop(priority)
+                return
 
 
         message_queue.put(priority) # Notify
@@ -91,7 +97,7 @@ class TrainingManager():
                     process.terminate()
 
 
-    def adapt(self, training_data=None, training_data_name=None, model_list=None):
+    def adapt(self, training_data=None, training_data_name=None, model_list=None, load_models=False):
         priorities = list(range(0, self.n_models))
 
         with Manager() as manager:
@@ -100,7 +106,7 @@ class TrainingManager():
             for priority in priorities:
                 model = self.models_indexed_by_priority[priority]
                 model_class = model['model']
-                p = Process(target=self.handle_training, args=(model_class, priority, self.message_queue,insufficient_capacity_list,training_data, training_data_name, model_list))
+                p = Process(target=self.handle_training, args=(model_class, priority, self.message_queue,insufficient_capacity_list,training_data, training_data_name, model_list, load_models))
                 p.start()
                 self.process_map[priority] = p
                 time.sleep(0.05) # Avoid processes to be launched out of order

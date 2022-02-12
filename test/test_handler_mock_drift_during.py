@@ -25,6 +25,7 @@ class TestHandler(unittest.TestCase):
         self.is_initial_training_from_topic = False    
 
         self.inference_data_topic = 'inference_5'
+        self.prediction_result_topic = 'prediction'
 
 
         # Mock training data
@@ -87,6 +88,7 @@ class TestHandler(unittest.TestCase):
             training_data_topic=self.training_data_topic,
             is_initial_training_from_topic=self.is_initial_training_from_topic,
             initial_training_data=self.initial_training_data,
+            prediction_result_topic=self.prediction_result_topic,
             inference_data_topic=self.inference_data_topic
             )
 

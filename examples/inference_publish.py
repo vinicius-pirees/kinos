@@ -14,6 +14,7 @@ from phaino.config.config import PhainoConfiguration
 config = PhainoConfiguration().get_config()
 profile = config['general']['profile']
 ADOC_DATASET_LOCATION = config[profile]['adoc_dataset_location']
+KAFKA_BROKER_LIST = config[profile]['kafka_broker_list']
 
 
 inference_data_topic = 'inference_5'
@@ -35,7 +36,7 @@ if mode == 'mock':
     initial_training_data = sequence_1 + sequence_2
 
 
-    image_producer = ImageProducer("localhost:29092", inference_data_topic, max_message_size_mb=8, debug=True, resize_to_dimension=(256,256))
+    image_producer = ImageProducer(KAFKA_BROKER_LIST, inference_data_topic, max_message_size_mb=8, debug=True, resize_to_dimension=(256,256))
 
     for frame in initial_training_data:
         image_producer.send_frame(frame)
@@ -45,9 +46,10 @@ if mode == 'mock':
 if mode == 'real':
 
     # Real data, two videos
-    image_producer = ImageProducer("localhost:29092", inference_data_topic, max_message_size_mb=8, debug=True, resize_to_dimension=(256,256))
+    image_producer = ImageProducer(KAFKA_BROKER_LIST, inference_data_topic, max_message_size_mb=8, debug=True, resize_to_dimension=(256,256))
 
-    num_frames = 30
+    num_frames = 15
+    #num_frames = 30
     #num_frames = 100
 
 
@@ -63,7 +65,7 @@ if mode == 'real':
         while(cap.isOpened()):
             ret, frame = cap.read()
             if ret==True and counter<num_frames:
-                image_producer.send_frame(frame, extra_fields={})    
+                image_producer.send_frame(frame, extra_fields={"sequence_name": video, "frame_number": counter})    
                 counter+=1
             else:
                 cap.release()

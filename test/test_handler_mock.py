@@ -14,6 +14,8 @@ from phaino.config.config import PhainoConfiguration
 config = PhainoConfiguration().get_config()
 profile = config['general']['profile']
 ADOC_DATASET_LOCATION = config[profile]['adoc_dataset_location']
+KAFKA_BROKER_LIST = config[profile]['kafka_broker_list']
+
 
 
 
@@ -25,6 +27,7 @@ class TestHandler(unittest.TestCase):
         self.is_initial_training_from_topic = False    
 
         self.inference_data_topic = 'inference_5'
+        self.prediction_result_topic = 'prediction'
 
 
         # Mock training data
@@ -97,6 +100,7 @@ class TestHandler(unittest.TestCase):
             training_data_topic=self.training_data_topic,
             is_initial_training_from_topic=self.is_initial_training_from_topic,
             initial_training_data=self.initial_training_data,
+            prediction_result_topic=self.prediction_result_topic,
             inference_data_topic=self.inference_data_topic
             )
 
@@ -107,16 +111,16 @@ class TestHandler(unittest.TestCase):
 
     def send_training_data(self):
 
-        home_dir = '/home/viniciusgoncalves'
-        dataset_location = os.path.join(home_dir,'toy_dataset/adoc/')
-        video_files = os.listdir(dataset_location)
+        
+        adoc_dataset_location = ADOC_DATASET_LOCATION
+        video_files = os.listdir(adoc_dataset_location)
 
         train_video_files = [x for x in video_files if x[0:5] == 'train']
         train_video_files.sort()
         train_video_files = train_video_files[1:2] # not all videos for test
 
         for video in train_video_files:
-            video_producer = VideoProducer("localhost:29092", self.training_data_topic, os.path.join(dataset_location, video), debug=True, resize_to_dimension=(256,256))
+            video_producer = VideoProducer(KAFKA_BROKER_LIST, self.training_data_topic, os.path.join(adoc_dataset_location, video), debug=True, resize_to_dimension=(256,256))
             video_producer.send_video(extra_fields={"sequence_name": video})
 
         

@@ -9,6 +9,7 @@ from phaino.config.config import PhainoConfiguration
 config = PhainoConfiguration().get_config()
 profile = config['general']['profile']
 project_name  = config['general']['project_name']
+KAFKA_BROKER_LIST = config[profile]['kafka_broker_list']
 
 
 
@@ -28,7 +29,7 @@ class TrainingDataAcquisition():
     """
     def __init__(self, topic=None, group_id_suffix=None):
         if topic is not None:
-            self.consumer = ImageFiniteConsumer("localhost:29092", topic, group_id_suffix=group_id_suffix)
+            self.consumer = ImageFiniteConsumer(KAFKA_BROKER_LIST, topic, group_id_suffix=group_id_suffix)
 
         self.set_training_count()
         self.data = {}
@@ -49,40 +50,52 @@ class TrainingDataAcquisition():
             self.training_count = train_numbers[-1] + 1
 
 
-    def load(self, input_data=None):
-        if input_data is None:
-            sequences_data = {}
-            for msg in self.consumer.consumer:
-                sequence_name = msg.value.get('sequence_name')
+    def load(self, input_data=None, load_last_saved=False):
+        if load_last_saved:
+            last_saved_training_count = self.training_count - 1
+            self.train_name = 'training_data_' + str(last_saved_training_count)
+            path = os.path.join(config[profile]['directory'], project_name, "training_data", self.train_name)
+            with open(os.path.join(path, "data.pkl"),"rb") as handle:
+                self.data = pickle.load(handle)
+        else:
+            if input_data is None:
+                sequences_data = {}
+                for msg in self.consumer.consumer:
+                    sequence_name = msg.value.get('sequence_name')
 
-                if sequence_name is None:
-                    sequence_name = 'sequence'
+                    if sequence_name is None:
+                        sequence_name = 'sequence'
 
-                if sequences_data.get(sequence_name) is None:
-                    sequences_data[sequence_name] = []
+                    if sequences_data.get(sequence_name) is None:
+                        sequences_data[sequence_name] = []
+                    
+                    sequences_data[sequence_name].append(frame_from_bytes_str(msg.value['data']))
+            else:
+                sequences_data = input_data
+
+
+            if isinstance(sequences_data, dict):
+                self.data = []
+                for _, value in sequences_data.items():
+                    self.data.append(value)
+            else:
+                self.data = sequences_data
+
+
+            training_examples = len(self.data)    
                 
-                sequences_data[sequence_name].append(frame_from_bytes_str(msg.value['data']))
-        else:
-            sequences_data = input_data
+            if training_examples == 0:
+                raise DataNotFoundException("There is not data to proceed with the training")
+            else:
+                print("Number of training examples:", training_examples)
 
-
-        if isinstance(sequences_data, dict):
-            self.data = []
-            for _, value in sequences_data.items():
-                self.data.append(value)
-        else:
-            self.data = sequences_data
+            # Save the training data
+            self.train_name = 'training_data_' + str(self.training_count)
+            path = os.path.join(config[profile]['directory'], project_name, "training_data", self.train_name)
+            os.makedirs(path, exist_ok=True)
             
-        if len(self.data) == 0:
-            raise DataNotFoundException("There is not data to proceed with the training")
+            with open(os.path.join(path, "data.pkl"),"wb") as handle:
+                pickle.dump(sequences_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-        # Save the training data
-        self.train_name = 'training_data_' + str(self.training_count)
-        path = os.path.join(config[profile]['directory'], project_name, "training_data", self.train_name)
-        os.makedirs(path, exist_ok=True)
-        
-        with open(os.path.join(path, "data.pkl"),"wb") as handle:
-            pickle.dump(sequences_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-        self.training_count+=1
+            self.training_count+=1
 

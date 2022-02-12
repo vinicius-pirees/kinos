@@ -208,6 +208,11 @@ class LSTMAutoEncoder:
     def load_model(self, path):
         self.model = load_model(path, custom_objects={'LayerNormalization': LayerNormalization})
 
+        with open(os.path.join(os.path.dirname(path), "metadata.json")) as infile:
+            metadata = json.load(infile)
+        
+        self.training_data_name = metadata['training_data_name']
+
     def load_last_model(self):
         base_path = get_last_model_path(self.model_name)
         path = os.path.join(base_path, 'model')

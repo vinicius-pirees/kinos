@@ -11,6 +11,7 @@ from phaino.config.config import PhainoConfiguration
 config = PhainoConfiguration().get_config()
 profile = config['general']['profile']
 ADOC_DATASET_LOCATION = config[profile]['adoc_dataset_location']
+KAFKA_BROKER_LIST = config[profile]['kafka_broker_list']
 
 
 
@@ -46,7 +47,7 @@ ADOC_DATASET_LOCATION = config[profile]['adoc_dataset_location']
 
 
 
-consumer = ImageFiniteConsumer("localhost:29092", "training_3")
+consumer = ImageFiniteConsumer(KAFKA_BROKER_LIST, "training_3")
 videos = {}
 for msg in consumer.consumer:
     val = msg.value['data']

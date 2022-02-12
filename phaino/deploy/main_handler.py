@@ -30,12 +30,18 @@ class MainHandler():
             is_initial_training_from_topic=True,
             initial_training_data=None,
             inference_data_topic=None,
+            prediction_result_topic=None,
             frame_dimension=(256,256),
-            read_retries=2
+            read_retries=2,
+            initially_load_models=False
             ):
+
+
+        #TODO: Validate parameters
 
         self.number_training_frames_after_drift = number_training_frames_after_drift
         self.read_retries = read_retries
+        self.initially_load_models = initially_load_models
         self.handler = Handler(
             models=models,
             user_constraints=user_constraints,
@@ -46,7 +52,9 @@ class MainHandler():
             is_initial_training_from_topic=is_initial_training_from_topic,
             initial_training_data=initial_training_data,
             inference_data_topic=inference_data_topic,
-            frame_dimension=frame_dimension
+            prediction_result_topic=prediction_result_topic,
+            frame_dimension=frame_dimension,
+            initially_load_models=initially_load_models
             )
 
 
@@ -61,6 +69,7 @@ class MainHandler():
         #inject new data at training topic
         print("Acquiring new training data")
         training_frames_counter = 0
+        self.initially_load_models = False
         with tqdm(total=self.number_training_frames_after_drift) as pbar:
             for msg in self.handler.inference_data_acquisition.consumer.consumer:
                 if training_frames_counter >= self.number_training_frames_after_drift:
@@ -69,6 +78,7 @@ class MainHandler():
                 self.handler.training_after_drift_producer.producer.flush()
                 training_frames_counter+=1
                 pbar.update(1)
+        self.handler.inference_data_acquisition.consumer.consumer.commit()
 
                 
         time.sleep(10)
@@ -79,8 +89,9 @@ class MainHandler():
         sucess_read = False
         for i in range(0, self.read_retries):
             try:
-                self.handler.training_data_acquirer.load()
+                self.handler.training_data_acquirer.load(load_last_saved=self.initially_load_models)
                 sucess_read = True
+                self.initially_load_models = False
                 break
             except DataNotFoundException as e:
                 print(e)

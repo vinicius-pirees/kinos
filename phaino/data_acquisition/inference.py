@@ -2,11 +2,16 @@ import os
 import pickle
 from phaino.streams.consumers import ImageConsumer
 from phaino.utils.commons import frame_from_bytes_str
+from phaino.config.config import PhainoConfiguration
+
+config = PhainoConfiguration().get_config()
+profile = config['general']['profile']
+KAFKA_BROKER_LIST = config[profile]['kafka_broker_list']
 
 
 class InferenceDataAcquisition():
-    def __init__(self, topic):
-        self.consumer = ImageConsumer("localhost:29092", topic)
+    def __init__(self, topic, enable_auto_commit=True):
+        self.consumer = ImageConsumer(KAFKA_BROKER_LIST, topic, enable_auto_commit=enable_auto_commit)
 
 
     # TODO: consume in batches
