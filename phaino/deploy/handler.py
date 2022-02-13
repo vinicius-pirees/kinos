@@ -13,6 +13,8 @@ from phaino.data_acquisition.inference import InferenceDataAcquisition
 from phaino.streams.producers import ImageProducer, GenericProducer
 from phaino.utils.commons import frame_from_bytes_str
 from phaino.config.config import PhainoConfiguration
+from kafka.errors import CommitFailedError
+
 
 
 config = PhainoConfiguration().get_config()
@@ -38,7 +40,9 @@ class Handler():
             inference_data_topic=None,
             prediction_result_topic=None,
             frame_dimension=(256,256),
-            initially_load_models=False
+            initially_load_models=False,
+            detect_drift=True,
+            adapt_after_drift=True
             ):
         self.models= models
         self.user_constraints = user_constraints
@@ -47,6 +51,8 @@ class Handler():
         self.prediction_result_topic = prediction_result_topic
         self.number_training_frames_after_drift = number_training_frames_after_drift
         self.initially_load_models = initially_load_models
+        self.detect_drift = detect_drift
+        self.adapt_after_drift = adapt_after_drift
         self.inference_data_acquisition = InferenceDataAcquisition(topic=inference_data_topic, enable_auto_commit=False)
         self.drift_detector = DriftDetector(dimensionality_reduction=dimensionality_reduction,
                                             drift_algorithm=drift_algorithm)
@@ -89,7 +95,8 @@ class Handler():
         else:
             training_sequence = self.training_data_acquirer.data
        
-        self.drift_detector.update_base_data(training_sequence)
+        if self.detect_drift:
+            self.drift_detector.update_base_data(training_sequence)
 
 
 
@@ -185,7 +192,11 @@ class Handler():
                             sequence_counter = 0
                             sequence = []
                             self.prediction_result_producer.send(prediction_dict)
-                            self.inference_data_acquisition.consumer.consumer.commit()
+                            try:
+                                self.inference_data_acquisition.consumer.consumer.commit()
+                            except CommitFailedError as e:
+                                print(e)
+                                return
                     else:
                         prediction_dict = {}
                         prediciton = model.predict(data)
@@ -195,17 +206,23 @@ class Handler():
 
 
                         self.prediction_result_producer.send(prediction_dict)
-                        self.inference_data_acquisition.consumer.consumer.commit()
+                        try:
+                            self.inference_data_acquisition.consumer.consumer.commit()
+                        except CommitFailedError as e:
+                            print(e)
+                            return
                     
                     time.sleep(1)
 
-                    in_drift, drift_index = self.drift_detector.drift_check([data])
-                    if in_drift:
-                        logger.info("Drift detected")
-                        self.kill_child_proc(p.pid)
-                        p.terminate()
-                        os.system('kill {0}'.format(p.pid))
-                        return True
+                    if self.detect_drift:
+                        in_drift, drift_index = self.drift_detector.drift_check([data])
+                        if in_drift:
+                            logger.info("Drift detected")
+                            if self.adapt_after_drift:
+                                self.kill_child_proc(p.pid)
+                                p.terminate()
+                                os.system('kill {0}'.format(p.pid))
+                                return True
 
 
                         

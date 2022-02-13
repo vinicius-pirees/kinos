@@ -33,7 +33,9 @@ class MainHandler():
             prediction_result_topic=None,
             frame_dimension=(256,256),
             read_retries=2,
-            initially_load_models=False
+            initially_load_models=False,
+            detect_drift=True,
+            adapt_after_drift=True
             ):
 
 
@@ -42,6 +44,8 @@ class MainHandler():
         self.number_training_frames_after_drift = number_training_frames_after_drift
         self.read_retries = read_retries
         self.initially_load_models = initially_load_models
+        self.detect_drift = detect_drift
+        self.adapt_after_drift = adapt_after_drift
         self.handler = Handler(
             models=models,
             user_constraints=user_constraints,
@@ -54,14 +58,16 @@ class MainHandler():
             inference_data_topic=inference_data_topic,
             prediction_result_topic=prediction_result_topic,
             frame_dimension=frame_dimension,
-            initially_load_models=initially_load_models
+            initially_load_models=initially_load_models,
+            detect_drift=self.detect_drift,
+            adapt_after_drift=self.adapt_after_drift
             )
 
 
     def start(self):
         while True:
             drift = self.handler.start()
-            if drift:
+            if drift and self.adapt_after_drift:
                 self.on_drift()
 
     

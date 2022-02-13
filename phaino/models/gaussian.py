@@ -205,9 +205,9 @@ class Gaussian:
         
     def load_last_model(self):
         path = get_last_model_path(self.model_name)
-        self.pca_set = pickle.load(open(os.path.join(path, "pca.pkl"),'rb'))
 
-        
+        with open(os.path.join(path, "pca.pkl"),"rb") as handle:
+            self.pca_set = pickle.load(handle)
 
         
         return self.load_model(os.path.join(path, 'model.pkl'))
