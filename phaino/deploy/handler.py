@@ -14,7 +14,7 @@ from phaino.streams.producers import ImageProducer, GenericProducer
 from phaino.utils.commons import frame_from_bytes_str
 from phaino.config.config import PhainoConfiguration
 from kafka.errors import CommitFailedError
-
+from numba import cuda
 
 
 config = PhainoConfiguration().get_config()
@@ -196,7 +196,8 @@ class Handler():
                                 self.inference_data_acquisition.consumer.consumer.commit()
                             except CommitFailedError as e:
                                 print(e)
-                                return
+                                time.sleep(1)
+                                continue
                     else:
                         prediction_dict = {}
                         prediciton = model.predict(data)
@@ -224,6 +225,11 @@ class Handler():
                                 self.kill_child_proc(p.pid)
                                 p.terminate()
                                 os.system('kill {0}'.format(p.pid))
+
+                                # Making sure to release the gpus, if it's the case
+                                if cuda.is_available():
+                                    for device in cuda.gpus:
+                                        device.reset()
                                 return True
 
 
