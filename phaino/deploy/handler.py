@@ -212,12 +212,14 @@ class Handler():
                             print(e)
                             return
                     
-                    time.sleep(1)
+                    #time.sleep(1)
 
                     if self.detect_drift:
                         in_drift, drift_index = self.drift_detector.drift_check([data])
                         if in_drift:
                             logger.info("Drift detected")
+                            if current_sequence_name is not None:
+                                print(f"Drift at {current_sequence_name} frame {frame_number}")
                             if self.adapt_after_drift:
                                 self.kill_child_proc(p.pid)
                                 p.terminate()
