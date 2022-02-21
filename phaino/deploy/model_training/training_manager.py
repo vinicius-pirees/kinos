@@ -36,7 +36,6 @@ class TrainingManager():
         if load_models:
             logger.info("Loading previously trained model")
         else:
-            logger.info(f"priority {priority}")
             try:
                 model.fit(training_data, training_data_name)
             except Exception as e: #TODO Consider only exceptions related to lack of computing capacity

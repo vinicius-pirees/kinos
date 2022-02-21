@@ -227,9 +227,11 @@ class Handler():
                                 os.system('kill {0}'.format(p.pid))
 
                                 # Making sure to release the gpus, if it's the case
-                                if cuda.is_available():
-                                    for device in cuda.gpus:
-                                        device.reset()
+                                #if cuda.is_available():
+                                    #for device in cuda.gpus:
+                                        #device.reset()
+                                        #cuda.select_device(device.id)
+                                        #cuda.close()
                                 return True
 
 

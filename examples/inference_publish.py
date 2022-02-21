@@ -48,8 +48,8 @@ if mode == 'real':
     # Real data, two videos
     image_producer = ImageProducer(KAFKA_BROKER_LIST, inference_data_topic, max_message_size_mb=8, debug=True, resize_to_dimension=(256,256))
 
-    num_frames = 15
-    #num_frames = 30
+    #num_frames = 15
+    num_frames = 30
     #num_frames = 100
 
 
