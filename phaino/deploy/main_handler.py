@@ -1,18 +1,26 @@
 import json
+from multiprocessing import Process, Queue
+from threading import Thread
 import sys
 import time
 from kafka import KafkaConsumer
 from tqdm import tqdm
+from phaino.config.config import PhainoConfiguration
 from phaino.deploy.handler import Handler
 from phaino.data_acquisition.training import TrainingDataAcquisition
 from phaino.data_acquisition.training import DataNotFoundException
 from phaino.streams.consumers import ImageFiniteConsumer
 import logging
+from phaino.streams.producers import GenericProducer
 
 
 logger = logging.getLogger('kafka')
 logger.addHandler(logging.StreamHandler(sys.stdout))
 logger.setLevel(logging.INFO)
+
+config = PhainoConfiguration().get_config()
+profile = config['general']['profile']
+KAFKA_BROKER_LIST = config[profile]['kafka_broker_list']
 
 
 from phaino.utils.commons import frame_from_bytes_str
@@ -46,6 +54,8 @@ class MainHandler():
         self.initially_load_models = initially_load_models
         self.detect_drift = detect_drift
         self.adapt_after_drift = adapt_after_drift
+        self.prediction_result_topic = prediction_result_topic
+        self.prediction_queue = Queue()
         self.handler = Handler(
             models=models,
             user_constraints=user_constraints,
@@ -60,54 +70,34 @@ class MainHandler():
             frame_dimension=frame_dimension,
             initially_load_models=initially_load_models,
             detect_drift=self.detect_drift,
+            read_retries=read_retries,
+            prediction_queue=self.prediction_queue,
             adapt_after_drift=self.adapt_after_drift
             )
 
 
     def start(self):
+        p_prediction = Process(target=self.prediction_process)
+        p_prediction.start()
+
         while True:
-            drift = self.handler.start()
-            if drift and self.adapt_after_drift:
-                self.on_drift()
+            p = Process(target=self.handler.start)
+            p.start()
+            p.join()
+
+            if self.adapt_after_drift:
+                self.handler.on_drift()
+                p.terminate()
+
+
+
+    def prediction_process(self):
+        prediction_result_producer = GenericProducer(KAFKA_BROKER_LIST, self.prediction_result_topic, debug=True)
+        while True:
+            prediction_dict = self.prediction_queue.get()
+            prediction_result_producer.send(prediction_dict)
 
     
-    def on_drift(self):
-        #inject new data at training topic
-        print("Acquiring new training data")
-        training_frames_counter = 0
-        self.initially_load_models = False
-        with tqdm(total=self.number_training_frames_after_drift) as pbar:
-            for msg in self.handler.inference_data_acquisition.consumer.consumer:
-                if training_frames_counter >= self.number_training_frames_after_drift:
-                    break
-                self.handler.training_after_drift_producer.send_frame(frame_from_bytes_str(msg.value['data']))   
-                self.handler.training_after_drift_producer.producer.flush()
-                training_frames_counter+=1
-                pbar.update(1)
-        self.handler.inference_data_acquisition.consumer.consumer.commit()
-
-                
-        time.sleep(10)
-        #Load the new training data
-        print("Loading new training data")
-        self.handler.training_data_acquirer = TrainingDataAcquisition(topic=self.handler.training_data_topic, group_id_suffix='training')
-        
-        sucess_read = False
-        for i in range(0, self.read_retries):
-            try:
-                self.handler.training_data_acquirer.load(load_last_saved=self.initially_load_models)
-                sucess_read = True
-                self.initially_load_models = False
-                break
-            except DataNotFoundException as e:
-                print(e)
-                print(f"Try {i} of {self.read_retries}")
-                
-        if not sucess_read:
-            raise Exception("The data could not be loaded!")
-            
-        print("New training data loaded")
-
-        self.handler.reset()
+    
 
 

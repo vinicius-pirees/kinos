@@ -13,6 +13,7 @@ from phaino.data_acquisition.inference import InferenceDataAcquisition
 from phaino.streams.producers import ImageProducer, GenericProducer
 from phaino.utils.commons import frame_from_bytes_str
 from phaino.config.config import PhainoConfiguration
+from phaino.data_acquisition.training import DataNotFoundException
 from kafka.errors import CommitFailedError
 from numba import cuda
 
@@ -24,6 +25,14 @@ KAFKA_BROKER_LIST = config[profile]['kafka_broker_list']
 
 logging.basicConfig(level = logging.INFO, format='%(filename)s - %(asctime)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+
+prediction_queue = Queue()
+
+
+
+
+
 
 
 class Handler():
@@ -42,6 +51,8 @@ class Handler():
             frame_dimension=(256,256),
             initially_load_models=False,
             detect_drift=True,
+            prediction_queue=None,
+            read_retries=2,
             adapt_after_drift=True
             ):
         self.models= models
@@ -53,10 +64,12 @@ class Handler():
         self.initially_load_models = initially_load_models
         self.detect_drift = detect_drift
         self.adapt_after_drift = adapt_after_drift
+        self.read_retries = read_retries
         self.inference_data_acquisition = InferenceDataAcquisition(topic=inference_data_topic, enable_auto_commit=False)
         self.drift_detector = DriftDetector(dimensionality_reduction=dimensionality_reduction,
                                             drift_algorithm=drift_algorithm)
         self.model_queue = Queue()
+        self.prediction_queue = prediction_queue
 
 
         if is_initial_training_from_topic:
@@ -68,6 +81,7 @@ class Handler():
 
 
         self.training_after_drift_producer = ImageProducer(KAFKA_BROKER_LIST, self.training_data_topic, resize_to_dimension=frame_dimension, debug=True)
+        
         self.prediction_result_producer = GenericProducer(KAFKA_BROKER_LIST, self.prediction_result_topic, debug=True)
 
                                             
@@ -97,6 +111,48 @@ class Handler():
        
         if self.detect_drift:
             self.drift_detector.update_base_data(training_sequence)
+
+
+    def on_drift(self):
+        #inject new data at training topic
+        print("Acquiring new training data")
+        training_frames_counter = 0
+        self.initially_load_models = False
+        with tqdm(total=self.number_training_frames_after_drift) as pbar:
+            for msg in self.inference_data_acquisition.consumer.consumer:
+                if training_frames_counter >= self.number_training_frames_after_drift:
+                    break
+                self.training_after_drift_producer.send_frame(frame_from_bytes_str(msg.value['data']))   
+                self.training_after_drift_producer.producer.flush()
+                training_frames_counter+=1
+                pbar.update(1)
+        self.inference_data_acquisition.consumer.consumer.commit()
+
+                
+        time.sleep(10)
+        #Load the new training data
+        print("Loading new training data")
+        self.training_data_acquirer = TrainingDataAcquisition(topic=self.training_data_topic, group_id_suffix='training')
+        
+        sucess_read = False
+        for i in range(0, self.read_retries):
+            try:
+                self.training_data_acquirer.load(load_last_saved=self.initially_load_models)
+                sucess_read = True
+                self.initially_load_models = False
+                break
+            except DataNotFoundException as e:
+                print(e)
+                print(f"Try {i} of {self.read_retries}")
+                
+        if not sucess_read:
+            raise Exception("The data could not be loaded!")
+            
+        print("New training data loaded")
+
+        self.reset()
+
+
 
 
 
@@ -191,7 +247,10 @@ class Handler():
                             prediction_dict['sequence_name'] = sequence_name
                             sequence_counter = 0
                             sequence = []
-                            self.prediction_result_producer.send(prediction_dict)
+
+                            self.prediction_queue.put(prediction_dict)
+                            # self.prediction_result_producer.send(prediction_dict)
+                            # self.prediction_result_producer.producer.flush()
                             try:
                                 self.inference_data_acquisition.consumer.consumer.commit()
                             except CommitFailedError as e:
