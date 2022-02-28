@@ -123,7 +123,6 @@ class LSTMAutoEncoder:
 
 
     def fit(self, training_set, training_data_name=None):
-        print("Fit lstm")
         keras.backend.clear_session()
 
         temp_training_set = []
@@ -161,7 +160,6 @@ class LSTMAutoEncoder:
         seq.add(TimeDistributed(Conv2D(1, (11, 11), activation="sigmoid", padding="same")))
         print(seq.summary())
         seq.compile(loss='mse', optimizer=keras.optimizers.Adam(lr=1e-4, decay=1e-5, epsilon=1e-6))
-        print("It's going to fit")
         seq.fit(final_training_set, final_training_set,
                 batch_size=self.batch_size, epochs=self.epochs, shuffle=False)
 

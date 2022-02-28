@@ -108,5 +108,32 @@ def get_first_model_path(model_name):
             return os.path.join(models_path, last_model)
 
 
+def get_clips(frames_list, sequence_size, shape=(256,256)):
+        """ 
+        Parameters
+        ----------
+        frames_list : list
+            A list of sorted frames of shape 256 X 256
+        sequence_size: int
+            The size of the lstm sequence
+        Returns
+        -------
+        list
+            A list of clips , sequence_size frames each
+        """
+        clips = []
+        sz = len(frames_list)
+        clip = np.zeros(shape=(sequence_size, shape[0], shape[1], 1))
+        cnt = 0
+
+        for i in range(0, sz):
+            clip[cnt, :, :, 0] = frames_list[i]
+            cnt = cnt + 1
+            if cnt == sequence_size:
+                clips.append(clip.copy())
+                cnt = 0
+        return clips
+
+
 
 
