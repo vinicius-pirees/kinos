@@ -52,7 +52,7 @@ class TestCNNAutoencoderPrediction(unittest.TestCase):
 
 
     def test_cnn(self):
-        cnn = CNNAutoEncoder(model_name='cnn_1', epochs=20)
+        cnn = CNNAutoEncoder(model_name='cnn_1', epochs=4, batch_size=1)
 
         cnn.fit(self.training_data_acquirer.data)
         #cnn.load_last_model()
