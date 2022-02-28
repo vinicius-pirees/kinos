@@ -65,6 +65,7 @@ class Handler():
         self.detect_drift = detect_drift
         self.adapt_after_drift = adapt_after_drift
         self.read_retries = read_retries
+        self.inference_data_topic = inference_data_topic
         self.inference_data_acquisition = InferenceDataAcquisition(topic=inference_data_topic, enable_auto_commit=False)
         self.drift_detector = DriftDetector(dimensionality_reduction=dimensionality_reduction,
                                             drift_algorithm=drift_algorithm)
@@ -100,6 +101,7 @@ class Handler():
         
 
     def reset(self):
+        self.inference_data_acquisition = InferenceDataAcquisition(topic=self.inference_data_topic, enable_auto_commit=False)
         self.training_manager = TrainingManager(self.models, self.user_constraints, self.model_queue)
 
         training_sequence = []
@@ -118,6 +120,7 @@ class Handler():
         print("Acquiring new training data")
         training_frames_counter = 0
         self.initially_load_models = False
+        self.inference_data_acquisition = InferenceDataAcquisition(topic=self.inference_data_topic, enable_auto_commit=False)
         with tqdm(total=self.number_training_frames_after_drift) as pbar:
             for msg in self.inference_data_acquisition.consumer.consumer:
                 if training_frames_counter >= self.number_training_frames_after_drift:
