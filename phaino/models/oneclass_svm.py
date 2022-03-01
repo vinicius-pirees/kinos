@@ -113,7 +113,7 @@ class OneClassSVM:
 
 
         predictions = self.model.score_samples(x)
-        return predictions
+        return predictions[0]
 
     def save_model(self):
         logger.info(f"Saving the model {self.model_name}")
@@ -155,8 +155,9 @@ class OneClassSVM:
     def load_last_model(self):
         path = get_last_model_path(self.model_name)
 
-        with open(os.path.join(path, "pca.pkl"),"rb") as handle:
-            self.pca_set = pickle.load(handle)
+        if self.pca:
+            with open(os.path.join(path, "pca.pkl"),"rb") as handle:
+                self.pca_set = pickle.load(handle)
 
         return self.load_model(os.path.join(path, 'model.pkl'))
 
