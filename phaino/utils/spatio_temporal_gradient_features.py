@@ -181,7 +181,8 @@ def generate_features_frames(frames, cube_depth=5, tile_size=10, description='')
     if len(sequences[-1]) != cube_depth: ## If last sequence does not have sufficient frames, leave it out
         sequences = sequences[0:-1]
 
-    for sequence in tqdm(sequences, desc=description):
+    #for sequence in tqdm(sequences, desc=description): # Removing tqdm for now
+    for sequence in sequences:
         sequence = [reduce_frame(frame_to_gray(frame)) for frame in sequence]
         features = generate_features(sequence, cube_depth, tile_size)
         result = features.reshape(1, features.shape[0]*features.shape[1])

@@ -50,9 +50,9 @@ def get_model_scores_map(pred):
     for frame, score in pred.items():
         score = np.round(score, 3)
         if score not in model_scores_map.keys():
-            model_scores_map[score] = [int(frame)]
+            model_scores_map[score] = [frame]
         else:
-            model_scores_map[score].append(int(frame))
+            model_scores_map[score].append(frame)
     return model_scores_map
 
 
@@ -132,28 +132,39 @@ def get_overall_result(gts, preds):
             results_dict[score] = {"tp":0,"fp":0,"fn":0,"tn":0}
 
 
-
+    all_anormal_frames = []
+    all_normal_frames = []
+    all_scores_map = {}
+    
     for video in gts.keys():
         anomaly_frames = get_video_anomaly_frames(gts[video])
         normal_frames = get_video_normal_frames(gts[video], anomaly_frames)
 
 
-        video_predictions = preds.get(video)
+        all_anormal_frames += [video + '_' + str(x) for x in anomaly_frames]
+        all_normal_frames += [video + '_' + str(x) for x in normal_frames]
+
+        video_predictions = {}
+
+        for key, value in preds.get(video).items():
+            video_predictions[video + '_' + str(key)] = value
+
         scores_map = {}
         if video_predictions is not None:
             scores_map = get_model_scores_map(video_predictions)
+            all_scores_map.update(scores_map)
 
-        for score in results_dict.keys():
-            if scores_map.get(score) is None:
-                results_dict[score]['fn'] = results_dict[score]['fn']  + len(anomaly_frames)
-                results_dict[score]['tn'] = results_dict[score]['tn'] + len(normal_frames)
-            else:
-                pred_frames  =  get_pred_frames_above_threshold(scores_map, score)
-                video_results = get_video_results(pred_frames, anomaly_frames, normal_frames)
-                results_dict[score]['tp'] = results_dict[score]['tp'] + video_results['tp']
-                results_dict[score]['fp'] = results_dict[score]['fp'] + video_results['fp']
-                results_dict[score]['fn'] = results_dict[score]['fn'] + video_results['fn']
-                results_dict[score]['tn'] = results_dict[score]['tn'] + video_results['tn']
+    for score in results_dict.keys():
+        if all_scores_map.get(score) is None:
+            results_dict[score]['fn'] = results_dict[score]['fn']  + len(anomaly_frames)
+            results_dict[score]['tn'] = results_dict[score]['tn'] + len(normal_frames)
+        else:
+            pred_frames  =  get_pred_frames_above_threshold(all_scores_map, score)
+            video_results = get_video_results(pred_frames, all_anormal_frames, all_normal_frames)
+            results_dict[score]['tp'] = results_dict[score]['tp'] + video_results['tp']
+            results_dict[score]['fp'] = results_dict[score]['fp'] + video_results['fp']
+            results_dict[score]['fn'] = results_dict[score]['fn'] + video_results['fn']
+            results_dict[score]['tn'] = results_dict[score]['tn'] + video_results['tn']
 
     return results_dict
 

@@ -21,25 +21,32 @@ inference_data_topic = 'inference_5'
 
 
 
-#mode = 'mock'
-mode = 'real'
+mode = 'mock'
+#mode = 'real'
+mock_repeat = True
 
 
 if mode == 'mock':
 
-    num_frames = 7
+    num_frames = 1000
 
     # Mock data
     dataset = load_sample_images() 
+    
+    
     sequence_1 = [dataset.images[0] for x in range(num_frames)]
     sequence_2 = [dataset.images[1] for x in range(num_frames)]
-    initial_training_data = sequence_1 + sequence_2
+    
+    if mock_repeat:
+        initial_training_data = sequence_1 + sequence_2
+    else:
+        initial_training_data = sequence_1
 
 
     image_producer = ImageProducer(KAFKA_BROKER_LIST, inference_data_topic, max_message_size_mb=8, debug=True, resize_to_dimension=(256,256))
 
-    for frame in initial_training_data:
-        image_producer.send_frame(frame)
+    for i, frame in enumerate(initial_training_data):
+        image_producer.send_frame(frame, extra_fields={"sequence_name": 'mock', "frame_number": i})
 
 
 
@@ -50,7 +57,7 @@ if mode == 'real':
 
     #num_frames = 15
     #num_frames = 30
-    num_frames = 100
+    num_frames = 500
 
 
     # video_files = ['test_drift_two_rainn_1.avi','train_1.avi']

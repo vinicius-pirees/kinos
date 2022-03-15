@@ -2,13 +2,7 @@ import os
 import json
 import numpy as np
 import cv2
-import tensorflow as tf
-from keras.backend.tensorflow_backend import set_session
 
-config = tf.ConfigProto()
-config.gpu_options.allow_growth = True
-sess = tf.Session(config=config)
-set_session(sess)
 
 import keras
 from keras import layers
@@ -57,6 +51,14 @@ class CNNAutoEncoder:
         return get_clips(frames_list=input_frames, sequence_size=self.sequence_size)
 
     def fit(self, training_set, training_data_name=None):
+        import tensorflow as tf
+        from keras.backend.tensorflow_backend import set_session
+
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
+        sess = tf.Session(config=config)
+        set_session(sess)
+        
         temp_training_set = []
         if training_data_name is not None:
             self.training_data_name = training_data_name
@@ -127,6 +129,15 @@ class CNNAutoEncoder:
             json.dump(metadata, outfile)
 
     def load_model(self, path):
+        import tensorflow as tf
+        from keras.backend.tensorflow_backend import set_session
+
+        config = tf.ConfigProto()
+        #config.gpu_options.per_process_gpu_memory_fraction = 0.8
+        config.gpu_options.allow_growth = True
+        sess = tf.Session(config=config)
+        set_session(sess)
+        
         self.model = load_model(path)
 
         with open(os.path.join(os.path.dirname(path), "metadata.json")) as infile:

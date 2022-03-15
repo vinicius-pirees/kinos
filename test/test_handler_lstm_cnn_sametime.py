@@ -68,7 +68,7 @@ class TestHandlerReal(unittest.TestCase):
                 "training_rate": 100,
                 "efectiveness": 50,
                 "inference_rate": 9,
-                "model":  CNNAutoEncoder(model_name='cnn_1', epochs=3, batch_size=1)
+                "model":  CNNAutoEncoder(model_name='cnn_1', epochs=1, batch_size=1)
             },
             
             

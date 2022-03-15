@@ -1,3 +1,4 @@
+
 import keras
 from keras.layers import Conv2DTranspose, ConvLSTM2D, BatchNormalization, TimeDistributed, Conv2D
 from keras.models import Sequential, load_model
@@ -123,7 +124,15 @@ class LSTMAutoEncoder:
 
 
     def fit(self, training_set, training_data_name=None):
-        keras.backend.clear_session()
+        
+        import tensorflow as tf
+        from keras.backend.tensorflow_backend import set_session
+
+        config = tf.ConfigProto()
+        #config.gpu_options.allow_growth = True
+        config.gpu_options.per_process_gpu_memory_fraction = 0.8
+        sess = tf.Session(config=config)
+        set_session(sess)
 
         temp_training_set = []
         if training_data_name is not None:
@@ -207,6 +216,19 @@ class LSTMAutoEncoder:
     
     
     def load_model(self, path):
+        import keras
+        keras.backend.clear_session()
+        import tensorflow as tf
+        from keras.backend.tensorflow_backend import set_session
+
+        config = tf.ConfigProto()
+        #config.gpu_options.allow_growth = True
+        #config.gpu_options.per_process_gpu_memory_fraction = 0.8
+        config.gpu_options.per_process_gpu_memory_fraction = 0.5
+        sess = tf.Session(config=config)
+        set_session(sess)
+        
+        
         self.model = load_model(path, custom_objects={'LayerNormalization': LayerNormalization})
 
         with open(os.path.join(os.path.dirname(path), "metadata.json")) as infile:

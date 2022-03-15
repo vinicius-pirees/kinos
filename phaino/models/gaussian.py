@@ -200,15 +200,18 @@ class Gaussian:
 
         with open(os.path.join(os.path.dirname(path), "metadata.json")) as infile:
             metadata = json.load(infile)
+
+        
+        with open(os.path.join(os.path.dirname(path), "pca.pkl"), 'rb') as handle:
+            self.pca_set = pickle.load(handle)
+
         
         self.training_data_name = metadata['training_data_name']
         
     def load_last_model(self):
         path = get_last_model_path(self.model_name)
 
-        with open(os.path.join(path, "pca.pkl"),"rb") as handle:
-            self.pca_set = pickle.load(handle)
-
+        
         
         return self.load_model(os.path.join(path, 'model.pkl'))
 
