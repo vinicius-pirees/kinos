@@ -128,11 +128,11 @@ class LSTMAutoEncoder:
         import tensorflow as tf
         from keras.backend.tensorflow_backend import set_session
 
-        config = tf.ConfigProto()
-        #config.gpu_options.allow_growth = True
-        config.gpu_options.per_process_gpu_memory_fraction = 0.8
-        sess = tf.Session(config=config)
-        set_session(sess)
+#         config = tf.ConfigProto()
+#         #config.gpu_options.allow_growth = True
+#         config.gpu_options.per_process_gpu_memory_fraction = 0.8
+#         sess = tf.Session(config=config)
+#         set_session(sess)
 
         temp_training_set = []
         if training_data_name is not None:
@@ -221,12 +221,12 @@ class LSTMAutoEncoder:
         import tensorflow as tf
         from keras.backend.tensorflow_backend import set_session
 
-        config = tf.ConfigProto()
-        #config.gpu_options.allow_growth = True
-        #config.gpu_options.per_process_gpu_memory_fraction = 0.8
-        config.gpu_options.per_process_gpu_memory_fraction = 0.5
-        sess = tf.Session(config=config)
-        set_session(sess)
+#         config = tf.ConfigProto()
+#         #config.gpu_options.allow_growth = True
+#         #config.gpu_options.per_process_gpu_memory_fraction = 0.8
+#         config.gpu_options.per_process_gpu_memory_fraction = 0.5
+#         sess = tf.Session(config=config)
+#         set_session(sess)
         
         
         self.model = load_model(path, custom_objects={'LayerNormalization': LayerNormalization})
