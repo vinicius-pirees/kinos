@@ -43,7 +43,8 @@ class MainHandler():
             read_retries=2,
             initially_load_models=False,
             detect_drift=True,
-            adapt_after_drift=True
+            adapt_after_drift=True,
+            provide_training_data_after_drift=False
             ):
 
 
@@ -72,7 +73,8 @@ class MainHandler():
             detect_drift=self.detect_drift,
             read_retries=read_retries,
             prediction_queue=self.prediction_queue,
-            adapt_after_drift=self.adapt_after_drift
+            adapt_after_drift=self.adapt_after_drift,
+            provide_training_data_after_drift=provide_training_data_after_drift
             )
 
 

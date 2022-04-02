@@ -26,12 +26,12 @@ class TestCNNAutoencoderPrediction(unittest.TestCase):
         self.is_initial_training_from_topic = True   
         self.initial_training_data  = None
 
-        self.inference_data_topic = 'inference_5'
+        self.inference_data_topic = 'inference'
         self.inference_data_acquisition = InferenceDataAcquisition(topic=self.inference_data_topic)
 
         
         # # Send training data
-        self.training_data_topic = 'training_3'
+        self.training_data_topic = 'training'
 
         adoc_dataset_location = ADOC_DATASET_LOCATION
         video_files = os.listdir(adoc_dataset_location)

@@ -18,6 +18,7 @@ class MockModel():
         self.epoch_time_seconds = epoch_time_seconds
         self.insufficient_computing = insufficient_computing
         self.model_name = model_name
+        self.sequence_size = 10
     
 
     def fit(self, training_data=None, training_data_name=None):

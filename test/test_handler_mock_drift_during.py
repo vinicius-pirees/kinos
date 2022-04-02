@@ -24,7 +24,7 @@ class TestHandler(unittest.TestCase):
 
         self.is_initial_training_from_topic = False    
 
-        self.inference_data_topic = 'inference_5'
+        self.inference_data_topic = 'inference'
         self.prediction_result_topic = 'prediction'
 
 
@@ -40,7 +40,7 @@ class TestHandler(unittest.TestCase):
 
         
         # # Send training data
-        self.training_data_topic = 'training_3'
+        self.training_data_topic = 'training'
 
         self.user_constraints = {
             "is_real_time": False,

@@ -17,12 +17,12 @@ ADOC_DATASET_LOCATION = config[profile]['adoc_dataset_location']
 KAFKA_BROKER_LIST = config[profile]['kafka_broker_list']
 
 
-inference_data_topic = 'inference_5'
+inference_data_topic = 'inference'
 
 
 
-mode = 'mock'
-#mode = 'real'
+#mode = 'mock'
+mode = 'real'
 mock_repeat = True
 
 

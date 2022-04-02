@@ -29,9 +29,9 @@ class TestHandlerReal(unittest.TestCase):
         self.initially_load_models  = False
         self.initial_training_data  = None
 
-        self.inference_data_topic = 'inference_5'
+        self.inference_data_topic = 'inference'
         self.prediction_result_topic = 'prediction'
-        self.training_data_topic = 'training_3'
+        self.training_data_topic = 'training'
 
         
         # # Send training data

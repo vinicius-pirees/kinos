@@ -27,9 +27,9 @@ class TrainingDataAcquisition():
                 'sequence_2'  [[0, 0, 0, 200], [0, 0, 0, 200]]
             }
     """
-    def __init__(self, topic=None, group_id_suffix=None):
+    def __init__(self, topic=None, group_id_suffix=None, consumer_timeout_ms=5000):
         if topic is not None:
-            self.consumer = ImageFiniteConsumer(KAFKA_BROKER_LIST, topic, group_id_suffix=group_id_suffix)
+            self.consumer = ImageFiniteConsumer(KAFKA_BROKER_LIST, topic, group_id_suffix=group_id_suffix, consumer_timeout_ms=consumer_timeout_ms)
 
         self.set_training_count()
         self.data = {}
@@ -76,18 +76,23 @@ class TrainingDataAcquisition():
 
             if isinstance(sequences_data, dict):
                 self.data = []
-                for _, value in sequences_data.items():
+                number_training_examples = 0
+                for seq, value in sequences_data.items():
                     self.data.append(value)
+                    number_training_examples += len(sequences_data[seq])
+
+                num_training_sequences = len(self.data)
+                
+                    
             else:
                 self.data = sequences_data
-
-
-            training_examples = len(self.data)    
+                num_training_sequences = 1
+                number_training_examples = len(self.data)
                 
-            if training_examples == 0:
+            if num_training_sequences == 0:
                 raise DataNotFoundException("There is not data to proceed with the training")
             else:
-                print("Number of training examples:", training_examples)
+                print("Number of training examples:", number_training_examples)
 
             # Save the training data
             self.train_name = 'training_data_' + str(self.training_count)

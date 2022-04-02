@@ -43,7 +43,7 @@ class TestHandler(unittest.TestCase):
 
         
         # # Send training data
-        self.training_data_topic = 'training_3'
+        self.training_data_topic = 'training'
 
         # adoc_dataset_location = ADOC_DATASET_LOCATION
         # video_files = os.listdir(adoc_dataset_location)
@@ -101,7 +101,8 @@ class TestHandler(unittest.TestCase):
             is_initial_training_from_topic=self.is_initial_training_from_topic,
             initial_training_data=self.initial_training_data,
             prediction_result_topic=self.prediction_result_topic,
-            inference_data_topic=self.inference_data_topic
+            inference_data_topic=self.inference_data_topic,
+            provide_training_data_after_drift=True
             )
 
 

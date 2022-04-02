@@ -32,9 +32,9 @@ class TestHandlerReal(unittest.TestCase):
         self.detect_drift = True
         self.adapt_after_drift = False
 
-        self.inference_data_topic = 'inference_5'
+        self.inference_data_topic = 'inference'
         self.prediction_result_topic = 'prediction'
-        self.training_data_topic = 'training_3'
+        self.training_data_topic = 'training'
 
         
         # # Send training data

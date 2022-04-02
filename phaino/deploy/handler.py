@@ -53,7 +53,8 @@ class Handler():
             detect_drift=True,
             prediction_queue=None,
             read_retries=2,
-            adapt_after_drift=True
+            adapt_after_drift=True,
+            provide_training_data_after_drift=False
             ):
         self.models= models
         self.user_constraints = user_constraints
@@ -64,6 +65,7 @@ class Handler():
         self.initially_load_models = initially_load_models
         self.detect_drift = detect_drift
         self.adapt_after_drift = adapt_after_drift
+        self.provide_training_data_after_drift = provide_training_data_after_drift
         self.read_retries = read_retries
         self.inference_data_topic = inference_data_topic
         self.inference_data_acquisition = InferenceDataAcquisition(topic=inference_data_topic, enable_auto_commit=False)
@@ -101,7 +103,7 @@ class Handler():
         
 
     def reset(self):
-        self.inference_data_acquisition = InferenceDataAcquisition(topic=self.inference_data_topic, enable_auto_commit=False)
+        #self.inference_data_acquisition = InferenceDataAcquisition(topic=self.inference_data_topic, enable_auto_commit=False)
         self.training_manager = TrainingManager(self.models, self.user_constraints, self.model_queue)
 
         training_sequence = []
@@ -116,26 +118,33 @@ class Handler():
 
 
     def on_drift(self):
-        #inject new data at training topic
-        print("Acquiring new training data")
-        training_frames_counter = 0
-        self.initially_load_models = False
-        self.inference_data_acquisition = InferenceDataAcquisition(topic=self.inference_data_topic, enable_auto_commit=False)
-        with tqdm(total=self.number_training_frames_after_drift) as pbar:
-            for msg in self.inference_data_acquisition.consumer.consumer:
-                if training_frames_counter >= self.number_training_frames_after_drift:
-                    break
-                self.training_after_drift_producer.send_frame(frame_from_bytes_str(msg.value['data']))   
-                self.training_after_drift_producer.producer.flush()
-                training_frames_counter+=1
-                pbar.update(1)
-        self.inference_data_acquisition.consumer.consumer.commit()
+        # Inject new data at training topic
+
+        if self.provide_training_data_after_drift:
+            print("Waiting for training data")
+            input("Press Enter when the data is finally loaded to the topic...")
+            self.training_data_acquirer = TrainingDataAcquisition(topic=self.training_data_topic, group_id_suffix='training', consumer_timeout_ms=10000)
+            print("The process will resume when no new data is added after 10 seconds")
+        else:
+            print("Acquiring new training data")
+            training_frames_counter = 0
+            self.initially_load_models = False
+            #self.inference_data_acquisition = InferenceDataAcquisition(topic=self.inference_data_topic, enable_auto_commit=False, group_id_suffix='adapt')
+            with tqdm(total=self.number_training_frames_after_drift) as pbar:
+                for msg in self.inference_data_acquisition.consumer.consumer:
+                    if training_frames_counter >= self.number_training_frames_after_drift:
+                        break
+                    self.training_after_drift_producer.send_frame(frame_from_bytes_str(msg.value['data']))   
+                    self.training_after_drift_producer.producer.flush()
+                    training_frames_counter+=1
+                    pbar.update(1)
+            self.inference_data_acquisition.consumer.consumer.commit()
 
                 
-        time.sleep(10)
-        #Load the new training data
-        print("Loading new training data")
-        self.training_data_acquirer = TrainingDataAcquisition(topic=self.training_data_topic, group_id_suffix='training')
+            time.sleep(10)
+            #Load the new training data
+            print("Loading new training data")
+            self.training_data_acquirer = TrainingDataAcquisition(topic=self.training_data_topic, group_id_suffix='training')
         
         sucess_read = False
         for i in range(0, self.read_retries):

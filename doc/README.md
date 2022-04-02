@@ -1,0 +1,28 @@
+# Documentation
+
+## Configuration
+
+```
+[general]
+profile = dev
+project_name = evaluation
+
+[default]
+directory = /home/tmp/
+
+[models]
+directory = /home/viniciusgoncalves/phaino_models
+
+[dev]
+directory = /home/viniciusgoncalves/phaino_models
+adoc_dataset_location = /home/viniciusgoncalves/toy_dataset/adoc/
+kafka_broker_list = localhost:29092
+
+
+[prod]
+directory = /NFS/phaino_models
+adoc_dataset_location = /NFS/toy_dataset/adoc
+kafka_broker_list = localhost:29092
+
+
+``` 

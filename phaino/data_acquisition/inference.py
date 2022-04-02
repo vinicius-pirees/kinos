@@ -10,8 +10,8 @@ KAFKA_BROKER_LIST = config[profile]['kafka_broker_list']
 
 
 class InferenceDataAcquisition():
-    def __init__(self, topic, enable_auto_commit=True):
-        self.consumer = ImageConsumer(KAFKA_BROKER_LIST, topic, enable_auto_commit=enable_auto_commit)
+    def __init__(self, topic, enable_auto_commit=True, group_id_suffix=None):
+        self.consumer = ImageConsumer(KAFKA_BROKER_LIST, topic, enable_auto_commit=enable_auto_commit, group_id_suffix=group_id_suffix)
 
 
     # TODO: consume in batches
