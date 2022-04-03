@@ -43,7 +43,7 @@ class TestHandler(unittest.TestCase):
 
         
         # # Send training data
-        self.training_data_topic = 'training_3'
+        self.training_data_topic = 'training'
 
         # adoc_dataset_location = ADOC_DATASET_LOCATION
         # video_files = os.listdir(adoc_dataset_location)

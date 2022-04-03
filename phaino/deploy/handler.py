@@ -52,9 +52,10 @@ class Handler():
             initially_load_models=False,
             detect_drift=True,
             prediction_queue=None,
+            drift_alert_queue=None,
             read_retries=2,
             adapt_after_drift=True,
-            provide_training_data_after_drift=False
+            provide_training_data_after_drift=False            
             ):
         self.models= models
         self.user_constraints = user_constraints
@@ -73,6 +74,7 @@ class Handler():
                                             drift_algorithm=drift_algorithm)
         self.model_queue = Queue()
         self.prediction_queue = prediction_queue
+        self.drift_alert_queue = drift_alert_queue
 
 
         if is_initial_training_from_topic:
@@ -84,9 +86,6 @@ class Handler():
 
 
         self.training_after_drift_producer = ImageProducer(KAFKA_BROKER_LIST, self.training_data_topic, resize_to_dimension=frame_dimension, debug=True)
-        
-        self.prediction_result_producer = GenericProducer(KAFKA_BROKER_LIST, self.prediction_result_topic, debug=True)
-
                                             
         self.reset()
 
@@ -103,7 +102,6 @@ class Handler():
         
 
     def reset(self):
-        #self.inference_data_acquisition = InferenceDataAcquisition(topic=self.inference_data_topic, enable_auto_commit=False)
         self.training_manager = TrainingManager(self.models, self.user_constraints, self.model_queue)
 
         training_sequence = []
@@ -120,16 +118,17 @@ class Handler():
     def on_drift(self):
         # Inject new data at training topic
 
+        if not hasattr(self.training_data_acquirer, 'consumer'):
+            self.training_data_acquirer = TrainingDataAcquisition(topic=self.training_data_topic, group_id_suffix='training', consumer_timeout_ms=5000)
+
         if self.provide_training_data_after_drift:
             print("Waiting for training data")
             input("Press Enter when the data is finally loaded to the topic...")
-            self.training_data_acquirer = TrainingDataAcquisition(topic=self.training_data_topic, group_id_suffix='training', consumer_timeout_ms=10000)
-            print("The process will resume when no new data is added after 10 seconds")
+            print("The process will resume when no new data is added after 5 seconds")
         else:
             print("Acquiring new training data")
             training_frames_counter = 0
             self.initially_load_models = False
-            #self.inference_data_acquisition = InferenceDataAcquisition(topic=self.inference_data_topic, enable_auto_commit=False, group_id_suffix='adapt')
             with tqdm(total=self.number_training_frames_after_drift) as pbar:
                 for msg in self.inference_data_acquisition.consumer.consumer:
                     if training_frames_counter >= self.number_training_frames_after_drift:
@@ -142,13 +141,13 @@ class Handler():
 
                 
             time.sleep(10)
-            #Load the new training data
-            print("Loading new training data")
-            self.training_data_acquirer = TrainingDataAcquisition(topic=self.training_data_topic, group_id_suffix='training')
+            
         
         sucess_read = False
         for i in range(0, self.read_retries):
             try:
+                #Load the new training data
+                print("Loading new training data")
                 self.training_data_acquirer.load(load_last_saved=self.initially_load_models)
                 sucess_read = True
                 self.initially_load_models = False
@@ -261,8 +260,7 @@ class Handler():
                             sequence = []
 
                             self.prediction_queue.put(prediction_dict)
-                            # self.prediction_result_producer.send(prediction_dict)
-                            # self.prediction_result_producer.producer.flush()
+                            
                             try:
                                 self.inference_data_acquisition.consumer.consumer.commit()
                             except CommitFailedError as e:
@@ -276,8 +274,7 @@ class Handler():
                         prediction_dict['model_name'] = model_name
                         prediction_dict['training_data_name'] = training_data_name
 
-
-                        self.prediction_result_producer.send(prediction_dict)
+                        self.prediction_queue.put(prediction_dict)
                         try:
                             self.inference_data_acquisition.consumer.consumer.commit()
                         except CommitFailedError as e:
@@ -292,6 +289,7 @@ class Handler():
                             logger.info("Drift detected")
                             if current_sequence_name is not None:
                                 print(f"Drift at {current_sequence_name} frame {frame_number}")
+                                self.drift_alert_queue.put({"at": current_sequence_name, "frame": frame_number})
                             if self.adapt_after_drift:
                                 self.kill_child_proc(p.pid)
                                 p.terminate()

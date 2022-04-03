@@ -44,7 +44,8 @@ class MainHandler():
             initially_load_models=False,
             detect_drift=True,
             adapt_after_drift=True,
-            provide_training_data_after_drift=False
+            provide_training_data_after_drift=False,
+            drift_alert_topic='drift'
             ):
 
 
@@ -56,7 +57,9 @@ class MainHandler():
         self.detect_drift = detect_drift
         self.adapt_after_drift = adapt_after_drift
         self.prediction_result_topic = prediction_result_topic
+        self.drift_alert_topic = drift_alert_topic
         self.prediction_queue = Queue()
+        self.drift_alert_queue = Queue()
         self.handler = Handler(
             models=models,
             user_constraints=user_constraints,
@@ -73,6 +76,7 @@ class MainHandler():
             detect_drift=self.detect_drift,
             read_retries=read_retries,
             prediction_queue=self.prediction_queue,
+            drift_alert_queue=self.drift_alert_queue,
             adapt_after_drift=self.adapt_after_drift,
             provide_training_data_after_drift=provide_training_data_after_drift
             )
@@ -81,6 +85,9 @@ class MainHandler():
     def start(self):
         p_prediction = Process(target=self.prediction_process)
         p_prediction.start()
+
+        p_drift_alert = Process(target=self.drift_alert_process)
+        p_drift_alert.start()
 
         while True:
             p = Process(target=self.handler.start)
@@ -98,6 +105,12 @@ class MainHandler():
         while True:
             prediction_dict = self.prediction_queue.get()
             prediction_result_producer.send(prediction_dict)
+
+    def drift_alert_process(self):
+        drift_alert_producer = GenericProducer(KAFKA_BROKER_LIST, self.drift_alert_topic, debug=True)
+        while True:
+            drift_message = self.drift_alert_queue.get()
+            drift_alert_producer.send(drift_message)
 
     
     
