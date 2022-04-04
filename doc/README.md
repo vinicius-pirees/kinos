@@ -254,7 +254,7 @@ from phaino.drift.dimensionality_reduction.pca import PCA
 
 from phaino.models.gaussian import Gaussian
 from phaino.models.lstm_autoencoder import LSTMAutoEncoder
-from phaino.models.oneclass_svm import OneClassSVMs
+from phaino.models.oneclass_svm import OneClassSVM
 
 inference_data_topic = 'inference'
 prediction_result_topic = 'prediction'
