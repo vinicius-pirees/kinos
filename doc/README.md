@@ -216,6 +216,7 @@ The `MainHandler` is responsible for conducting the paralell training, adaption 
     Name of the Kafka topic where to store the predictions
 
 * **drift_alert_topic**
+
     Name of the Kafka topic where to store the concept drift detections
 
 * **frame_dimension**
@@ -235,6 +236,7 @@ The `MainHandler` is responsible for conducting the paralell training, adaption 
     Whether or not to detect concept drifts. Default=True.
 
 * **adapt_after_drift**
+
     Whether or not to adapt the models after a concept drift is detected. Default=True.
 
 * **number_training_frames_after_drift**
@@ -242,6 +244,7 @@ The `MainHandler` is responsible for conducting the paralell training, adaption 
     (Unsupervised tasks) Number of frames to use as training after the drift is detected. Default=200.
 
 * **provide_training_data_after_drift**
+
     (Supervised tasks) Option to provide the training data manually after a concept drift is detected. Default=False.
 
 
