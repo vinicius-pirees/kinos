@@ -89,19 +89,19 @@ class VideoProducer(ImageProducer):
         cap.release()
 
                 
-class WebCamProducer(ImageProducer):
-    def __init__(self, bootstrap_servers, topic, camera_number):
-        super().__init__(bootstrap_servers, topic)
+class CameraProducer(ImageProducer):
+    def __init__(self, bootstrap_servers, topic, camera_number, debug=False, resize_to_dimension=None):
+        super().__init__(bootstrap_servers, topic, debug=debug, resize_to_dimension=resize_to_dimension)
         self.camera_number = camera_number
 
-    def send_video(self):
+    def send_video(self,  extra_fields={}):
         cap = cap = cv2.VideoCapture(self.camera_number)
 
         while(True):
             ret, frame = cap.read()
 
             if ret==True:
-                super().send_frame(frame) 
+                super().send_frame(frame, extra_fields=extra_fields) 
             else:
                 break   
                 

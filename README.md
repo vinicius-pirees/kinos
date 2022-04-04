@@ -6,7 +6,7 @@ Phaino is a framework for Video Anomaly Detection
 
 
 ### Set up Kafka with docker
-Definey where Kafka data will be stored using the environment variable KAFKA_DATA
+Define where Kafka data will be stored using the environment variable KAFKA_DATA
 
 Ex:
 ```bash
