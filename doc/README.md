@@ -252,6 +252,10 @@ from phaino.deploy.main_handler import MainHandler
 from river.drift import PageHinkley
 from phaino.drift.dimensionality_reduction.pca import PCA
 
+from phaino.models.gaussian import Gaussian
+from phaino.models.lstm_autoencoder import LSTMAutoEncoder
+from phaino.models.oneclass_svm import OneClassSVMs
+
 inference_data_topic = 'inference'
 prediction_result_topic = 'prediction'
 training_data_topic = 'training'
