@@ -21,14 +21,14 @@ inference_data_topic = 'inference'
 
 
 
-#mode = 'mock'
-mode = 'real'
+mode = 'mock'
+#mode = 'real'
 mock_repeat = True
 
 
 if mode == 'mock':
 
-    num_frames = 1000
+    num_frames = 100
 
     # Mock data
     dataset = load_sample_images() 

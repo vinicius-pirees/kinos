@@ -195,6 +195,7 @@ class Handler():
 
                     if hasattr(model, 'model_name'):
                         model_name = model.model_name
+                        logger.info("Current model: " + model_name)
                     if hasattr(model, 'training_data_name'):
                         training_data_name = model.training_data_name
                     if hasattr(model, 'sequence_size'):
@@ -214,6 +215,7 @@ class Handler():
                         logger.info("Switching model")
                         if hasattr(model, 'model_name'):
                             model_name = model.model_name
+                            logger.info("Current model: " + model_name)
                         if hasattr(model, 'training_data_name'):
                             training_data_name = model.training_data_name
                         if hasattr(model, 'sequence_size'):
