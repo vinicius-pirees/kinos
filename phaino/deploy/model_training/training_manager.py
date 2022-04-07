@@ -32,6 +32,7 @@ class TrainingManager():
     def handle_training(self, model, priority, message_queue, insufficient_capacity_list, training_data=None, training_data_name=None, model_list=None, load_models=False):
         
         logger.info(f"priority {priority}")
+        model.priority = priority
 
         if load_models:
             logger.info("Loading previously trained model")

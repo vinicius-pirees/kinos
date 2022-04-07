@@ -188,9 +188,18 @@ class Handler():
             sequence_name = None
 
             while True:
+
                 try:
-                    model = model_list[-1]
-                    model.load_last_model()
+                    candidate_model = model_list[-1]
+
+                    try:
+                        if candidate_model.priority < model.priority:
+                            model = candidate_model
+                            model.load_last_model()
+                            
+                    except Exception as e: # model not defined yet
+                        model = candidate_model
+
                     model_list.pop()
 
                     if hasattr(model, 'model_name'):
@@ -209,9 +218,18 @@ class Handler():
                 
                 for msg in self.inference_data_acquisition.consumer.consumer:    
                     try:
-                        model = model_list[-1]
-                        model.load_last_model()
+                        candidate_model = model_list[-1]
+
+                        try:
+                            if candidate_model.priority < model.priority:
+                                model = candidate_model
+                                model.load_last_model()
+                        except Exception as e: # model not defined yet
+                            print(e)
+                            model = candidate_model
+
                         model_list.pop()
+
                         logger.info("Switching model")
                         if hasattr(model, 'model_name'):
                             model_name = model.model_name
