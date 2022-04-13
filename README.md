@@ -1,6 +1,6 @@
 # Phaino
 
-Phaino is a framework for Video Anomaly Detection
+Phaino is a concept drift-aware framework for managing machine learning models applied in videos.
 
 
 

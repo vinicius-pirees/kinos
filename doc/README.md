@@ -311,5 +311,7 @@ handler = MainHandler(
             inference_data_topic=inference_data_topic,
             drift_alert_topic=drift_alert_topic
             )
+            
+handler.start()
 ```
 
