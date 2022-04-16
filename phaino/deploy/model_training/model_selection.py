@@ -18,8 +18,18 @@ def assign_models_priority(user_constraints, models):
     else:
         working_models = models
 
+    for model in working_models:
+        if model.get("priority_weight") is None:
+            model["priority_weight"] = 0
 
-    sorted_models = sorted(working_models, key=lambda x: (x['efectiveness'], x['training_rate']), reverse=True)
+        if model.get("efectiveness") is None:
+            model["efectiveness"] = -1
+        
+        if model.get("training_rate") is None:
+            model["training_rate"] = -1
+
+
+    sorted_models = sorted(working_models, key=lambda x: (x['priority_weight'], x['efectiveness'], x['training_rate']), reverse=True)
 
     final_models = []
     for i, model in enumerate(sorted_models):
