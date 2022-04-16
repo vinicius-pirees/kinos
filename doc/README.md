@@ -110,16 +110,50 @@ In order to use a model with phaino it has to be configured as follows:
 * training_rate: estimate of how many examples can be trained per second
 * efectiveness: estimate of effectivess. Can be any metric, but has to be consistent over all models
 * inference_rate: estimate of how many examples per second it can handle at the inference phase
+* priority_weight: a number that controls the priority that should be given to the model
 * model: the actual model class
+
+
+These configurations will be used to prioritize model training and use. The training and adaptation process is over when the most prioritary model is available. This model is then used to make inferences.
+
+The priority is assigned considering priority_weight, efectiveness and training_rate, in this precedence order. Inference rate is used to define if a model can make real-time inferences (more than 30 frames per second).
 
 
 Ex:
 ```python
+
+## Informing only effectiveness and training/inference speed
 {
     "name": "gaussian_1",
     "training_rate": 200,
     "efectiveness": 30,
     "inference_rate": 10,
+    "model":  Gaussian(model_name='gaussian_1', pca=True, pca_n_components=100)
+}
+
+
+## Informing only the priority weight
+{
+    "name": "gaussian_1",
+    "priority_weight": 5,
+    "model":  Gaussian(model_name='gaussian_1', pca=True, pca_n_components=100)
+}
+
+
+## Informing only effectiveness, training/inference speed and priority weight (Priority weight takes precedence over other parameters)
+{
+    "name": "gaussian_1",
+    "training_rate": 200,
+    "efectiveness": 30,
+    "inference_rate": 10,
+    "priority_weight": 5,
+    "model":  Gaussian(model_name='gaussian_1', pca=True, pca_n_components=100)
+}
+
+
+## Not informing any parameter (the mdoel will take the minimum priority possible)
+{
+    "name": "gaussian_1",
     "model":  Gaussian(model_name='gaussian_1', pca=True, pca_n_components=100)
 }
 ```
