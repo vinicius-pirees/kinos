@@ -351,7 +351,7 @@ handler = MainHandler(
 handler.start()
 ```
 
-
+## Help
 
 
 ### Set up Kafka with docker
