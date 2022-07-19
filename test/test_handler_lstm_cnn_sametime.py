@@ -2,16 +2,16 @@ import os
 import cv2
 import unittest
 from river.drift import PageHinkley
-from phaino.deploy.handler import Handler
-from phaino.deploy.main_handler import MainHandler
-from phaino.drift.dimensionality_reduction.pca import PCA
-from phaino.models.cnn_autoencoder import CNNAutoEncoder
-from phaino.models.gaussian import Gaussian
-from phaino.models.lstm_autoencoder import LSTMAutoEncoder
-from phaino.models.mock_model import MockModel
-from phaino.streams.producers import VideoProducer
+from kinos.deploy.handler import Handler
+from kinos.deploy.main_handler import MainHandler
+from kinos.drift.dimensionality_reduction.pca import PCA
+from kinos.models.cnn_autoencoder import CNNAutoEncoder
+from kinos.models.gaussian import Gaussian
+from kinos.models.lstm_autoencoder import LSTMAutoEncoder
+from kinos.models.mock_model import MockModel
+from kinos.streams.producers import VideoProducer
 from sklearn.datasets import load_sample_images
-from phaino.config.config import PhainoConfiguration
+from kinos.config.config import PhainoConfiguration
 
 
 config = PhainoConfiguration().get_config()

@@ -14,7 +14,7 @@ from os import listdir
 from os.path import isfile, join, isdir
 import numpy as np
 import tensorflow as tf
-from phaino.utils.commons import frame_to_gray, reduce_frame, resolve_model_path, get_last_model_path
+from kinos.utils.commons import frame_to_gray, reduce_frame, resolve_model_path, get_last_model_path
 
 
 logging.basicConfig(level = logging.INFO, format='%(asctime)s - %(message)s')

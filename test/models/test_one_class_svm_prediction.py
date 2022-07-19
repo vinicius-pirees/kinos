@@ -1,13 +1,13 @@
 import unittest
 import os
 import time
-from phaino.data_acquisition.inference import InferenceDataAcquisition
-from phaino.data_acquisition.training import TrainingDataAcquisition
-from phaino.models.oneclass_svm import OneClassSVM
+from kinos.data_acquisition.inference import InferenceDataAcquisition
+from kinos.data_acquisition.training import TrainingDataAcquisition
+from kinos.models.oneclass_svm import OneClassSVM
 
-from phaino.streams.producers import VideoProducer
-from phaino.utils.commons import frame_from_bytes_str
-from phaino.config.config import PhainoConfiguration
+from kinos.streams.producers import VideoProducer
+from kinos.utils.commons import frame_from_bytes_str
+from kinos.config.config import PhainoConfiguration
 
 
 config = PhainoConfiguration().get_config()

@@ -6,14 +6,14 @@ import psutil
 from tqdm import tqdm
 from multiprocessing import Process, Manager, Queue
 from multiprocessing.managers import BaseManager
-from phaino.deploy.model_training.training_manager import TrainingManager
-from phaino.drift.detector import DriftDetector
-from phaino.data_acquisition.training import TrainingDataAcquisition
-from phaino.data_acquisition.inference import InferenceDataAcquisition
-from phaino.streams.producers import ImageProducer, GenericProducer
-from phaino.utils.commons import frame_from_bytes_str
-from phaino.config.config import PhainoConfiguration
-from phaino.data_acquisition.training import DataNotFoundException
+from kinos.deploy.model_training.training_manager import TrainingManager
+from kinos.drift.detector import DriftDetector
+from kinos.data_acquisition.training import TrainingDataAcquisition
+from kinos.data_acquisition.inference import InferenceDataAcquisition
+from kinos.streams.producers import ImageProducer, GenericProducer
+from kinos.utils.commons import frame_from_bytes_str
+from kinos.config.config import PhainoConfiguration
+from kinos.data_acquisition.training import DataNotFoundException
 from kafka.errors import CommitFailedError
 from numba import cuda
 

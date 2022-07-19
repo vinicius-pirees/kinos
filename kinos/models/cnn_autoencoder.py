@@ -6,10 +6,10 @@ import cv2
 
 import keras
 from keras import layers
-from phaino.utils.commons import get_clips
+from kinos.utils.commons import get_clips
 from keras.models import Sequential, load_model
 import logging
-from phaino.utils.commons import frame_to_gray, reduce_frame, resolve_model_path, get_last_model_path
+from kinos.utils.commons import frame_to_gray, reduce_frame, resolve_model_path, get_last_model_path
 
 
 

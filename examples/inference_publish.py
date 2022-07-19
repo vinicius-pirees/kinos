@@ -1,14 +1,14 @@
 import os
 import cv2
-from phaino.streams.producers import VideoProducer, ImageProducer
-from phaino.streams.consumers import ImageFiniteConsumer
-from phaino.utils.commons import frame_from_bytes_str
+from kinos.streams.producers import VideoProducer, ImageProducer
+from kinos.streams.consumers import ImageFiniteConsumer
+from kinos.utils.commons import frame_from_bytes_str
 
-from phaino.models.lstm_autoencoder import LSTMAutoEncoder
-from phaino.models.gaussian import Gaussian
+from kinos.models.lstm_autoencoder import LSTMAutoEncoder
+from kinos.models.gaussian import Gaussian
 from sklearn.datasets import load_sample_images
 from sklearn.datasets import load_digits
-from phaino.config.config import PhainoConfiguration
+from kinos.config.config import PhainoConfiguration
 
 
 config = PhainoConfiguration().get_config()

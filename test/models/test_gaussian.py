@@ -1,5 +1,5 @@
 import unittest
-from phaino.models.gaussian import Gaussian
+from kinos.models.gaussian import Gaussian
 from sklearn.datasets import load_sample_images
 
 

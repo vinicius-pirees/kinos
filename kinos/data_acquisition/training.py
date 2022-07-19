@@ -1,9 +1,9 @@
 from distutils.log import debug
 import os
 import pickle
-from phaino.streams.consumers import ImageFiniteConsumer
-from phaino.utils.commons import frame_from_bytes_str
-from phaino.config.config import PhainoConfiguration
+from kinos.streams.consumers import ImageFiniteConsumer
+from kinos.utils.commons import frame_from_bytes_str
+from kinos.config.config import PhainoConfiguration
 
 
 config = PhainoConfiguration().get_config()

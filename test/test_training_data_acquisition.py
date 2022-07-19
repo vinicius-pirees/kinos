@@ -2,9 +2,9 @@ import unittest
 import os
 import time
 
-from phaino.streams.producers import VideoProducer
-from phaino.data_acquisition.training import TrainingDataAcquisition
-from phaino.config.config import PhainoConfiguration
+from kinos.streams.producers import VideoProducer
+from kinos.data_acquisition.training import TrainingDataAcquisition
+from kinos.config.config import PhainoConfiguration
 
 
 config = PhainoConfiguration().get_config()

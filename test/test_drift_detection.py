@@ -1,7 +1,7 @@
 import unittest
-from phaino.drift.detector import  DriftDetector
-from phaino.drift.dimensionality_reduction.pca import PCA
-from phaino.drift.detector import DriftDetector
+from kinos.drift.detector import  DriftDetector
+from kinos.drift.dimensionality_reduction.pca import PCA
+from kinos.drift.detector import DriftDetector
 from river.drift import PageHinkley
 from sklearn.datasets import load_sample_images
 

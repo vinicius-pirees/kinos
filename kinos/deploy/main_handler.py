@@ -5,13 +5,13 @@ import sys
 import time
 from kafka import KafkaConsumer
 from tqdm import tqdm
-from phaino.config.config import PhainoConfiguration
-from phaino.deploy.handler import Handler
-from phaino.data_acquisition.training import TrainingDataAcquisition
-from phaino.data_acquisition.training import DataNotFoundException
-from phaino.streams.consumers import ImageFiniteConsumer
+from kinos.config.config import PhainoConfiguration
+from kinos.deploy.handler import Handler
+from kinos.data_acquisition.training import TrainingDataAcquisition
+from kinos.data_acquisition.training import DataNotFoundException
+from kinos.streams.consumers import ImageFiniteConsumer
 import logging
-from phaino.streams.producers import GenericProducer
+from kinos.streams.producers import GenericProducer
 
 
 logger = logging.getLogger('kafka')
@@ -23,7 +23,7 @@ profile = config['general']['profile']
 KAFKA_BROKER_LIST = config[profile]['kafka_broker_list']
 
 
-from phaino.utils.commons import frame_from_bytes_str
+from kinos.utils.commons import frame_from_bytes_str
 
 
 class MainHandler():

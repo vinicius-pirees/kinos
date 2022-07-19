@@ -5,7 +5,7 @@ from io import BytesIO
 import base64
 from datetime import datetime
 from confluent_kafka.admin import AdminClient, NewTopic
-from phaino.config.config import PhainoConfiguration
+from kinos.config.config import PhainoConfiguration
 
 
 config = PhainoConfiguration().get_config()
