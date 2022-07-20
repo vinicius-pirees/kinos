@@ -56,7 +56,7 @@ class TestTrainingManager(unittest.TestCase):
 
     def test_priority(self):
         training_manager = TrainingManager(self.models, self.user_constraints)
-        self.assertEqual(len(training_manager.models), 3)
+        self.assertEqual(len(training_manager.models), 5)
 
     
       
