@@ -7,9 +7,9 @@ import cv2
 import numpy as np
 from io import BytesIO
 import json
-from kinos.config.config import PhainoConfiguration
+from kinos.config.config import KinosConfiguration
 
-config = PhainoConfiguration().get_config()
+config = KinosConfiguration().get_config()
 project_name  = config['general']['project_name']
 
 

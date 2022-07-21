@@ -8,10 +8,10 @@ from kinos.drift.dimensionality_reduction.pca import PCA
 from kinos.models.mock_model import MockModel
 from kinos.streams.producers import VideoProducer
 from sklearn.datasets import load_sample_images
-from kinos.config.config import PhainoConfiguration
+from kinos.config.config import KinosConfiguration
 
 
-config = PhainoConfiguration().get_config()
+config = KinosConfiguration().get_config()
 profile = config['general']['profile']
 ADOC_DATASET_LOCATION = config[profile]['adoc_dataset_location']
 

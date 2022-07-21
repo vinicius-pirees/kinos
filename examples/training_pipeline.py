@@ -5,10 +5,10 @@ from kinos.utils.commons import frame_from_bytes_str
 
 from kinos.models.lstm_autoencoder import LSTMAutoEncoder
 from kinos.models.gaussian import Gaussian
-from kinos.config.config import PhainoConfiguration
+from kinos.config.config import KinosConfiguration
 
 
-config = PhainoConfiguration().get_config()
+config = KinosConfiguration().get_config()
 profile = config['general']['profile']
 ADOC_DATASET_LOCATION = config[profile]['adoc_dataset_location']
 KAFKA_BROKER_LIST = config[profile]['kafka_broker_list']

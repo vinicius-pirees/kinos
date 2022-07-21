@@ -7,10 +7,10 @@ from kinos.models.gaussian import Gaussian
 
 from kinos.streams.producers import VideoProducer
 from kinos.utils.commons import frame_from_bytes_str
-from kinos.config.config import PhainoConfiguration
+from kinos.config.config import KinosConfiguration
 
 
-config = PhainoConfiguration().get_config()
+config = KinosConfiguration().get_config()
 profile = config['general']['profile']
 ADOC_DATASET_LOCATION = config[profile]['adoc_dataset_location']
 

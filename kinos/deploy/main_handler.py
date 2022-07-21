@@ -5,7 +5,7 @@ import sys
 import time
 from kafka import KafkaConsumer
 from tqdm import tqdm
-from kinos.config.config import PhainoConfiguration
+from kinos.config.config import KinosConfiguration
 from kinos.deploy.handler import Handler
 from kinos.data_acquisition.training import TrainingDataAcquisition
 from kinos.data_acquisition.training import DataNotFoundException
@@ -18,7 +18,7 @@ logger = logging.getLogger('kafka')
 logger.addHandler(logging.StreamHandler(sys.stdout))
 logger.setLevel(logging.INFO)
 
-config = PhainoConfiguration().get_config()
+config = KinosConfiguration().get_config()
 profile = config['general']['profile']
 KAFKA_BROKER_LIST = config[profile]['kafka_broker_list']
 

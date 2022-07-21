@@ -5,10 +5,10 @@ from io import BytesIO
 import base64
 from datetime import datetime
 from confluent_kafka.admin import AdminClient, NewTopic
-from kinos.config.config import PhainoConfiguration
+from kinos.config.config import KinosConfiguration
 
 
-config = PhainoConfiguration().get_config()
+config = KinosConfiguration().get_config()
 profile = config['general']['profile']
 MODELS_DIRECTORY = config[profile]['directory']
 PROJECT_NAME = config['general']['project_name']

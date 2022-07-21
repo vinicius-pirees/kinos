@@ -12,13 +12,13 @@ from kinos.data_acquisition.training import TrainingDataAcquisition
 from kinos.data_acquisition.inference import InferenceDataAcquisition
 from kinos.streams.producers import ImageProducer, GenericProducer
 from kinos.utils.commons import frame_from_bytes_str
-from kinos.config.config import PhainoConfiguration
+from kinos.config.config import KinosConfiguration
 from kinos.data_acquisition.training import DataNotFoundException
 from kafka.errors import CommitFailedError
 from numba import cuda
 
 
-config = PhainoConfiguration().get_config()
+config = KinosConfiguration().get_config()
 profile = config['general']['profile']
 KAFKA_BROKER_LIST = config[profile]['kafka_broker_list']
 

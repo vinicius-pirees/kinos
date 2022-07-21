@@ -4,10 +4,10 @@ import time
 
 from kinos.streams.producers import VideoProducer
 from kinos.data_acquisition.training import TrainingDataAcquisition
-from kinos.config.config import PhainoConfiguration
+from kinos.config.config import KinosConfiguration
 
 
-config = PhainoConfiguration().get_config()
+config = KinosConfiguration().get_config()
 profile = config['general']['profile']
 # MODELS_DIRECTORY = config[profile]['directory']
 # PROJECT_NAME = config['general']['project_name']
