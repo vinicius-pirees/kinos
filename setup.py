@@ -13,7 +13,7 @@ with open(path.join(this_directory, 'requirements.txt'),
     requirements = f.read().splitlines()
 
 setuptools.setup(
-    name="phaino",
+    name="kinos",
     version="0.0.1",
     author="Vinícius Gonçalves",
     author_email="viniciuspires.go@gmail.com",
