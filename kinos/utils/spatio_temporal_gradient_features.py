@@ -3,8 +3,8 @@ import numpy as np
 import scipy.signal as sig
 from tqdm import tqdm
 
-from phaino.utils.commons import frame_to_gray, reduce_frame
-from phaino.utils.commons import frame_to_bytes_str, frame_from_bytes_str
+from kinos.utils.commons import frame_to_gray, reduce_frame
+from kinos.utils.commons import frame_to_bytes_str, frame_from_bytes_str
 
 
 

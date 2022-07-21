@@ -1,14 +1,14 @@
 import os
-from phaino.streams.producers import VideoProducer
-from phaino.streams.consumers import ImageFiniteConsumer
-from phaino.utils.commons import frame_from_bytes_str
+from kinos.streams.producers import VideoProducer
+from kinos.streams.consumers import ImageFiniteConsumer
+from kinos.utils.commons import frame_from_bytes_str
 
-from phaino.models.lstm_autoencoder import LSTMAutoEncoder
-from phaino.models.gaussian import Gaussian
-from phaino.config.config import PhainoConfiguration
+from kinos.models.lstm_autoencoder import LSTMAutoEncoder
+from kinos.models.gaussian import Gaussian
+from kinos.config.config import KinosConfiguration
 
 
-config = PhainoConfiguration().get_config()
+config = KinosConfiguration().get_config()
 profile = config['general']['profile']
 ADOC_DATASET_LOCATION = config[profile]['adoc_dataset_location']
 KAFKA_BROKER_LIST = config[profile]['kafka_broker_list']

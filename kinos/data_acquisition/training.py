@@ -1,12 +1,12 @@
 from distutils.log import debug
 import os
 import pickle
-from phaino.streams.consumers import ImageFiniteConsumer
-from phaino.utils.commons import frame_from_bytes_str
-from phaino.config.config import PhainoConfiguration
+from kinos.streams.consumers import ImageFiniteConsumer
+from kinos.utils.commons import frame_from_bytes_str
+from kinos.config.config import KinosConfiguration
 
 
-config = PhainoConfiguration().get_config()
+config = KinosConfiguration().get_config()
 profile = config['general']['profile']
 project_name  = config['general']['project_name']
 KAFKA_BROKER_LIST = config[profile]['kafka_broker_list']

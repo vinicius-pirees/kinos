@@ -2,7 +2,7 @@ import sys
 import time
 import logging
 from multiprocessing import Process, Queue, Array, Manager
-from phaino.deploy.model_training.model_selection import assign_models_priority
+from kinos.deploy.model_training.model_selection import assign_models_priority
 
 
 

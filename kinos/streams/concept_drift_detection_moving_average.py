@@ -1,9 +1,9 @@
 import sys
 
 
-from phaino.models.gaussian import Gaussian
-from phaino.streams.producers import ImageProducer
-from phaino.streams.consumers import ImageConsumer
+from kinos.models.gaussian import Gaussian
+from kinos.streams.producers import ImageProducer
+from kinos.streams.consumers import ImageConsumer
 import numpy as np
 
 

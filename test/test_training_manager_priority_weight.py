@@ -1,8 +1,8 @@
 import unittest
 from unittest.case import skip
-from phaino.models.mock_model import MockModel
-from phaino.deploy.model_training.model_selection import assign_models_priority
-from phaino.deploy.model_training.training_manager import TrainingManager
+from kinos.models.mock_model import MockModel
+from kinos.deploy.model_training.model_selection import assign_models_priority
+from kinos.deploy.model_training.training_manager import TrainingManager
 
 
 
@@ -56,7 +56,7 @@ class TestTrainingManager(unittest.TestCase):
 
     def test_priority(self):
         training_manager = TrainingManager(self.models, self.user_constraints)
-        self.assertEqual(len(training_manager.models), 3)
+        self.assertEqual(len(training_manager.models), 5)
 
     
       

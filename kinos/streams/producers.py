@@ -9,7 +9,7 @@ from io import BytesIO
 import json
 from datetime import datetime
 
-from phaino.utils.commons import frame_to_bytes_str, frame_from_bytes_str
+from kinos.utils.commons import frame_to_bytes_str, frame_from_bytes_str
 
 
 #Todo: use GenericProducer as base class

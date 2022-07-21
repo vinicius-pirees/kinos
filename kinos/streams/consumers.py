@@ -7,13 +7,13 @@ import cv2
 import numpy as np
 from io import BytesIO
 import json
-from phaino.config.config import PhainoConfiguration
+from kinos.config.config import KinosConfiguration
 
-config = PhainoConfiguration().get_config()
+config = KinosConfiguration().get_config()
 project_name  = config['general']['project_name']
 
 
-from phaino.utils.commons import frame_to_bytes_str, frame_from_bytes_str
+from kinos.utils.commons import frame_to_bytes_str, frame_from_bytes_str
 
 #Todo: use GenericConsumer as base class
 class GenericConsumer:

@@ -1,5 +1,5 @@
 import unittest
-from phaino.models.lstm_autoencoder import LSTMAutoEncoder
+from kinos.models.lstm_autoencoder import LSTMAutoEncoder
 from sklearn.datasets import load_sample_images
 
 

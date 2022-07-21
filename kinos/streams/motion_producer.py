@@ -1,7 +1,7 @@
 import sys
 
-from phaino.utils.motion_detection import MotionDetection
-from phaino.streams.producers import ImageProducer
+from kinos.utils.motion_detection import MotionDetection
+from kinos.streams.producers import ImageProducer
 
 
 

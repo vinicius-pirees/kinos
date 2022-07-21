@@ -6,8 +6,8 @@ import json
 from numpy import inf
 from sklearn.decomposition import PCA
 
-from phaino.utils.spatio_temporal_gradient_features import generate_features_frames
-from phaino.utils.commons import frame_to_gray, reduce_frame, resolve_model_path, get_last_model_path
+from kinos.utils.spatio_temporal_gradient_features import generate_features_frames
+from kinos.utils.commons import frame_to_gray, reduce_frame, resolve_model_path, get_last_model_path
 
 
 logging.basicConfig(level = logging.INFO, format='%(asctime)s - %(message)s')

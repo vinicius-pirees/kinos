@@ -1,9 +1,9 @@
-# Phaino
+# Kinos
 
-Phaino is a concept drift-aware framework for managing machine learning models applied in videos.
+Kinos is a concept drift-aware framework for managing machine learning models applied in videos.
 
 ## Configuration
-The framework configuration is set in the file `config/phaino.conf`.
+The framework configuration is set in the file `config/kinos.conf`.
 
 Example:
 ```
@@ -69,10 +69,10 @@ Multiple sources of data can be used. The methods to consume data from images, c
 
 ```python
 import cv2
-from phaino.config.config import PhainoConfiguration
-from phaino.streams.producers import VideoProducer, CameraProducer, ImageProducer
+from kinos.config.config import KinosConfiguration
+from kinos.streams.producers import VideoProducer, CameraProducer, ImageProducer
 
-config = PhainoConfiguration().get_config()
+config = KinosConfiguration().get_config()
 profile = config['general']['profile']
 KAFKA_BROKER_LIST = config[profile]['kafka_broker_list']
 TOPIC = 'inference'
@@ -98,7 +98,7 @@ image_producer.send_frame(image, extra_fields={"sequence_name": 'image_1'})
 
 ## Models
 
-There are predefined models at the directory phaino/models/ and other ones can be created. The models should have the following methods:
+There are predefined models at the directory kinos/models/ and other ones can be created. The models should have the following methods:
     
 * fit(training_set) -> trains the model with the respective training_set passes as the argument
 * predict(example) -> returns the prediction for the example argument
@@ -106,8 +106,8 @@ There are predefined models at the directory phaino/models/ and other ones can b
 * loads_model() -> loads the previously saved model
 
 
-### Model configuration to phaino
-In order to use a model with phaino it has to be configured as follows:
+### Model configuration to kinos
+In order to use a model with kinos it has to be configured as follows:
 * model_name: name given to the model so it can be saved, loaded and audited later
 * training_rate: estimate of how many examples can be trained per second
 * efectiveness: estimate of effectivess. Can be any metric, but has to be consistent over all models
@@ -199,18 +199,18 @@ The concept drift is done by comparing the inference data with previous data use
 * fit(base_data) -> perform dimensionality reduction on the base_data
 * predict(examples) -> return a score indicating how similiar each example is in relation to the base_data
 
-In addition to implement your own dimensionality reduction techniques, you can also use the ones available at phaino/drift/dimensionality_reduction/. An example is PCA.
+In addition to implement your own dimensionality reduction techniques, you can also use the ones available at kinos/drift/dimensionality_reduction/. An example is PCA.
 
 Ex:
 ```python
-from phaino.drift.dimensionality_reduction.pca import PCA
+from kinos.drift.dimensionality_reduction.pca import PCA
 
 dimensionality_reduction = PCA()
 dimensionality_reduction.fit(base_data)
 dimensionality_reduction.predict([0.1,0.2])
 ```
 
-## Training and continuous adaptation - phaino handler
+## Training and continuous adaptation - kinos handler
 
 The `MainHandler` is responsible for conducting the paralell training, adaption and inference for all the models. These are the possible configurations:
 
@@ -287,13 +287,13 @@ The `MainHandler` is responsible for conducting the paralell training, adaption 
 
 ## End-end-end example
 ```python
-from phaino.deploy.main_handler import MainHandler
+from kinos.deploy.main_handler import MainHandler
 from river.drift import PageHinkley
-from phaino.drift.dimensionality_reduction.pca import PCA
+from kinos.drift.dimensionality_reduction.pca import PCA
 
-from phaino.models.gaussian import Gaussian
-from phaino.models.lstm_autoencoder import LSTMAutoEncoder
-from phaino.models.oneclass_svm import OneClassSVM
+from kinos.models.gaussian import Gaussian
+from kinos.models.lstm_autoencoder import LSTMAutoEncoder
+from kinos.models.oneclass_svm import OneClassSVM
 
 inference_data_topic = 'inference'
 prediction_result_topic = 'prediction'
