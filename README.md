@@ -167,6 +167,7 @@ Ex:
     "adaptation": "continuous",
     "inference_rate": 40,
     "model":  KNN(model_name='knn1', k=6)
+}
 ```
 
 ## User constraints
