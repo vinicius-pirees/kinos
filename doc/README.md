@@ -151,10 +151,21 @@ Ex:
 }
 
 
-## Not informing any parameter (the mdoel will take the minimum priority possible)
+## Not informing any parameter (the model will take the minimum priority possible)
 {
     "name": "gaussian_1",
     "model":  Gaussian(model_name='gaussian_1', pca=True, pca_n_components=100)
+}
+
+
+## Using an continuos adaptation method (informed adaptation is the default option)
+{
+    "name": "knn1",
+    "training_rate": 1,
+    "efectiveness": 15,
+    "adaptation": "continuous",
+    "inference_rate": 40,
+    "model":  KNN(model_name='knn1', k=6)
 }
 ```
 
