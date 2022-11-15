@@ -110,6 +110,7 @@ In order to use a model with phaino it has to be configured as follows:
 * training_rate: estimate of how many examples can be trained per second
 * efectiveness: estimate of effectivess. Can be any metric, but has to be consistent over all models
 * inference_rate: estimate of how many examples per second it can handle at the inference phase
+* adaptation: the adaptation type. Can be "informed" (default) or "continuous"
 * priority_weight: a number that controls the priority that should be given to the model
 * model: the actual model class
 
