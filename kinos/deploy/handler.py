@@ -186,6 +186,7 @@ class Handler():
             model_name = None
             training_data_name = None
             sequence_name = None
+            adaptation = ""
 
             while True:
 
@@ -209,6 +210,15 @@ class Handler():
                         training_data_name = model.training_data_name
                     if hasattr(model, 'sequence_size'):
                         self.sequence_size = model.sequence_size
+
+
+                    model_user_configuration = [x for x in self.models if  model_name == x.get("name")]
+                    if len(model_user_configuration) != 0:
+                        adaptation = model_user_configuration[0].get("adaptation")
+                    else:
+                        adaptation = ""
+
+
                 except IndexError as e:
                     sleep_seconds = 5
                     logger.info(f"No model is available yet, checking again in {sleep_seconds} seconds")
@@ -310,6 +320,11 @@ class Handler():
                             if current_sequence_name is not None:
                                 print(f"Drift at {current_sequence_name} frame {frame_number}")
                                 self.drift_alert_queue.put({"at": current_sequence_name, "frame": frame_number})
+                            
+                            if adaptation == 'continuous':
+                                print("Adaptation of the current model is continuous. Thus, retraining is not needed")
+                                continue
+
                             if self.adapt_after_drift:
                                 self.kill_child_proc(p.pid)
                                 p.terminate()

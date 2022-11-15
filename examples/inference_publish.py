@@ -21,8 +21,8 @@ inference_data_topic = 'inference'
 
 
 
-mode = 'mock'
-#mode = 'real'
+#mode = 'mock'
+mode = 'real'
 mock_repeat = True
 
 
