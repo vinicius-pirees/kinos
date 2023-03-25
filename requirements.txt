@@ -1,7 +1,7 @@
 numpy>=1.13
 scipy>=1.4
 scikit_learn>=0.19.1
-tensorflow==1.4.0
+tensorflow==2.11.1
 keras==2.0.8
 keras-layer-normalization==0.14.0
 kafka-python>=2.0
